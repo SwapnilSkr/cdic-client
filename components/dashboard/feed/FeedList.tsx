@@ -27,8 +27,11 @@ const platformIcons = {
 
 interface Filters {
   platforms: string[];
-  sentiment?: string;
-  flagStatus?: "flagged" | "unflagged";
+  dateRange: { start: Date | null; end: Date | null };
+  language: string;
+  sentiment: string;
+  flagStatus: string;
+  sortBy: string;
 }
 
 export default function FeedList({ filters }: { filters: Filters }) {

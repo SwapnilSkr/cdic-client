@@ -24,8 +24,17 @@ const itemVariants = {
   },
 };
 
+interface Filters {
+  platforms: string[];
+  dateRange: { start: Date | null; end: Date | null };
+  language: string;
+  sentiment: string;
+  flagStatus: string;
+  sortBy: string;
+}
+
 export default function MediaFeedPage() {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Filters>({
     platforms: [],
     dateRange: { start: null, end: null },
     language: "",

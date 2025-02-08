@@ -38,6 +38,7 @@ const platforms = [
 
 interface Filters {
   platforms: string[];
+  dateRange: { start: Date | null; end: Date | null };
   language: string;
   sentiment: string;
   flagStatus: string;
@@ -46,7 +47,7 @@ interface Filters {
 
 interface FilterPanelProps {
   filters: Filters;
-  setFilters: (filters: Filters) => void;
+  setFilters: React.Dispatch<React.SetStateAction<Filters>>;
 }
 
 export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
