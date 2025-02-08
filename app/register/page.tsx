@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { RegistrationForm } from "@/components/registration-form";
 
@@ -20,13 +19,6 @@ export default function RegisterPage() {
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <Image
-            src="/logo.svg"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="mr-2"
-          />
           MediaMonitor
         </div>
         <div className="relative z-20 mt-auto">
