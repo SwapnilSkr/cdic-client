@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Rss, Hash, Flag, BarChart2, Users, X } from "lucide-react";
+import {
+  Home,
+  Rss,
+  Hash,
+  Flag,
+  BarChart2,
+  Users,
+  MessageSquare,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -13,6 +22,7 @@ const navItems = [
   { name: "Flagged Content", icon: Flag, href: "/dashboard/flagged" },
   { name: "Reporting", icon: BarChart2, href: "/dashboard/reporting" },
   { name: "User Management", icon: Users, href: "/dashboard/user" },
+  { name: "Ask AI", icon: MessageSquare, href: "/dashboard/ai-chat" },
 ];
 
 interface MobileSidebarProps {

@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { Home, Rss, Hash, Flag, BarChart2, Users } from "lucide-react";
+import {
+  Home,
+  Rss,
+  Hash,
+  Flag,
+  BarChart2,
+  Users,
+  MessageSquare,
+} from "lucide-react";
 
 const navItems = [
   { name: "Dashboard", icon: Home, href: "/dashboard" },
@@ -8,6 +16,7 @@ const navItems = [
   { name: "Flagged Content", icon: Flag, href: "/dashboard/flagged" },
   { name: "Reporting", icon: BarChart2, href: "/dashboard/reporting" },
   { name: "User Management", icon: Users, href: "/dashboard/user" },
+  { name: "Ask AI", icon: MessageSquare, href: "/dashboard/ai-chat" },
 ];
 
 export default function Sidebar() {
