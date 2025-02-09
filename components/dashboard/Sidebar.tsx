@@ -7,6 +7,7 @@ import {
   BarChart2,
   Users,
   MessageSquare,
+  AtSign,
 } from "lucide-react";
 
 const navItems = [
@@ -15,8 +16,9 @@ const navItems = [
   { name: "Topics", icon: Hash, href: "/dashboard/topics" },
   { name: "Flagged Content", icon: Flag, href: "/dashboard/flagged" },
   { name: "Reporting", icon: BarChart2, href: "/dashboard/reporting" },
-  { name: "User Management", icon: Users, href: "/dashboard/user" },
   { name: "Ask AI", icon: MessageSquare, href: "/dashboard/ai-chat" },
+  { name: "Handles", icon: AtSign, href: "/dashboard/handles" },
+  { name: "User Management", icon: Users, href: "/dashboard/user" },
 ];
 
 export default function Sidebar() {
