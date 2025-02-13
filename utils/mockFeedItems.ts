@@ -1,21 +1,12 @@
-import { Facebook, Instagram, Youtube, MessageCircle } from "lucide-react";
-
 export type FeedItem = {
   id: number;
   platform: "Facebook" | "Instagram" | "YouTube" | "Reddit";
   author: { name: string; image: string };
   content: string;
   timestamp: string;
-  engagement: { likes: number; shares: number; comments: number };
+  engagement: { likes: number; views: number; comments: number };
   sentiment: "positive" | "neutral" | "negative";
   flagged: boolean;
-};
-
-export const platformIcons = {
-  Facebook,
-  Instagram,
-  Youtube,
-  Reddit: MessageCircle,
 };
 
 export const mockFeedItems: FeedItem[] = [
@@ -25,7 +16,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "John Doe", image: "/placeholder-user.jpg" },
     content: "Excited to announce our new product launch! #innovation",
     timestamp: "2 hours ago",
-    engagement: { likes: 1500, shares: 300, comments: 250 },
+    engagement: { likes: 1500, views: 5000, comments: 250 },
     sentiment: "positive",
     flagged: false,
   },
@@ -35,7 +26,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "Jane Smith", image: "/placeholder-user.jpg" },
     content: "Beautiful sunset at the beach 🌅 #naturelover",
     timestamp: "5 hours ago",
-    engagement: { likes: 3000, shares: 100, comments: 500 },
+    engagement: { likes: 3000, views: 10000, comments: 500 },
     sentiment: "positive",
     flagged: false,
   },
@@ -45,7 +36,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "Tech Reviews", image: "/placeholder-user.jpg" },
     content: "New video: Top 10 Smartphones of 2025 - You won't believe #5!",
     timestamp: "1 day ago",
-    engagement: { likes: 10000, shares: 2000, comments: 1500 },
+    engagement: { likes: 10000, views: 50000, comments: 1500 },
     sentiment: "neutral",
     flagged: false,
   },
@@ -55,7 +46,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "u/newsbreaker", image: "/placeholder-user.jpg" },
     content: "Breaking: Major scientific breakthrough in quantum computing",
     timestamp: "3 hours ago",
-    engagement: { likes: 5000, shares: 1000, comments: 3000 },
+    engagement: { likes: 5000, views: 20000, comments: 3000 },
     sentiment: "positive",
     flagged: false,
   },
@@ -66,7 +57,7 @@ export const mockFeedItems: FeedItem[] = [
     content:
       "Just finished my first marathon! Feeling accomplished 🏃‍♀️ #fitness",
     timestamp: "1 hour ago",
-    engagement: { likes: 800, shares: 50, comments: 120 },
+    engagement: { likes: 800, views: 3000, comments: 120 },
     sentiment: "positive",
     flagged: false,
   },
@@ -76,7 +67,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "Food Lover", image: "/placeholder-user.jpg" },
     content: "Trying out this new vegan restaurant in town 🥗 #foodie",
     timestamp: "4 hours ago",
-    engagement: { likes: 2500, shares: 75, comments: 300 },
+    engagement: { likes: 2500, views: 8000, comments: 300 },
     sentiment: "positive",
     flagged: false,
   },
@@ -87,7 +78,7 @@ export const mockFeedItems: FeedItem[] = [
     content:
       "Exploring hidden gems in Bali - You won't find these in guidebooks!",
     timestamp: "2 days ago",
-    engagement: { likes: 15000, shares: 3000, comments: 2000 },
+    engagement: { likes: 15000, views: 75000, comments: 2000 },
     sentiment: "positive",
     flagged: false,
   },
@@ -97,7 +88,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "u/politicalanalyst", image: "/placeholder-user.jpg" },
     content: "Opinion: The impact of recent policy changes on global economics",
     timestamp: "6 hours ago",
-    engagement: { likes: 3500, shares: 800, comments: 1500 },
+    engagement: { likes: 3500, views: 15000, comments: 1500 },
     sentiment: "neutral",
     flagged: false,
   },
@@ -107,7 +98,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "Local News Network", image: "/placeholder-user.jpg" },
     content: "Traffic alert: Major accident on Highway 101, expect delays",
     timestamp: "30 minutes ago",
-    engagement: { likes: 200, shares: 500, comments: 100 },
+    engagement: { likes: 200, views: 1000, comments: 100 },
     sentiment: "negative",
     flagged: true,
   },
@@ -118,7 +109,7 @@ export const mockFeedItems: FeedItem[] = [
     content:
       "New 30-day challenge starting tomorrow! Who's in? 💪 #fitnessmotivation",
     timestamp: "8 hours ago",
-    engagement: { likes: 5000, shares: 200, comments: 800 },
+    engagement: { likes: 5000, views: 15000, comments: 800 },
     sentiment: "positive",
     flagged: false,
   },
@@ -128,7 +119,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "DIY Crafts", image: "/placeholder-user.jpg" },
     content: "5 Easy Home Decor Ideas Using Recycled Materials",
     timestamp: "3 days ago",
-    engagement: { likes: 8000, shares: 1500, comments: 1000 },
+    engagement: { likes: 8000, views: 40000, comments: 1000 },
     sentiment: "positive",
     flagged: false,
   },
@@ -139,7 +130,7 @@ export const mockFeedItems: FeedItem[] = [
     content:
       "AMA: I'm a senior software engineer at a major tech company. Ask me anything!",
     timestamp: "12 hours ago",
-    engagement: { likes: 6000, shares: 300, comments: 2500 },
+    engagement: { likes: 6000, views: 25000, comments: 2500 },
     sentiment: "neutral",
     flagged: false,
   },
@@ -150,7 +141,7 @@ export const mockFeedItems: FeedItem[] = [
     content:
       "Join us for a beach cleanup this weekend! Let's protect our oceans 🌊 #environment",
     timestamp: "1 day ago",
-    engagement: { likes: 1200, shares: 400, comments: 150 },
+    engagement: { likes: 1200, views: 4000, comments: 150 },
     sentiment: "positive",
     flagged: false,
   },
@@ -161,7 +152,7 @@ export const mockFeedItems: FeedItem[] = [
     content:
       "Summer fashion haul! Swipe to see my favorite picks 👗👠 #fashionista",
     timestamp: "7 hours ago",
-    engagement: { likes: 7000, shares: 150, comments: 600 },
+    engagement: { likes: 7000, views: 20000, comments: 600 },
     sentiment: "positive",
     flagged: false,
   },
@@ -171,7 +162,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "Cooking Channel", image: "/placeholder-user.jpg" },
     content: "How to Make the Perfect Pizza Dough - Step by Step Guide",
     timestamp: "4 days ago",
-    engagement: { likes: 12000, shares: 2500, comments: 1800 },
+    engagement: { likes: 12000, views: 60000, comments: 1800 },
     sentiment: "positive",
     flagged: false,
   },
@@ -181,7 +172,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "u/moviebuff", image: "/placeholder-user.jpg" },
     content: "Unpopular Opinion: Why I think [MOVIE TITLE] is overrated",
     timestamp: "2 days ago",
-    engagement: { likes: 4000, shares: 200, comments: 3500 },
+    engagement: { likes: 4000, views: 16000, comments: 3500 },
     sentiment: "negative",
     flagged: false,
   },
@@ -191,7 +182,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "Local Restaurant", image: "/placeholder-user.jpg" },
     content: "New menu items alert! Come try our seasonal specials 🍽️ #foodie",
     timestamp: "5 hours ago",
-    engagement: { likes: 500, shares: 100, comments: 80 },
+    engagement: { likes: 500, views: 2000, comments: 80 },
     sentiment: "positive",
     flagged: false,
   },
@@ -202,7 +193,7 @@ export const mockFeedItems: FeedItem[] = [
     content:
       "Capturing the Northern Lights in Iceland. A dream come true! ✨ #auroraborealis",
     timestamp: "2 days ago",
-    engagement: { likes: 9000, shares: 500, comments: 700 },
+    engagement: { likes: 9000, views: 27000, comments: 700 },
     sentiment: "positive",
     flagged: false,
   },
@@ -212,7 +203,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "Science Explained", image: "/placeholder-user.jpg" },
     content: "The Mystery of Dark Matter: What We Know So Far",
     timestamp: "1 week ago",
-    engagement: { likes: 20000, shares: 5000, comments: 3000 },
+    engagement: { likes: 20000, views: 100000, comments: 3000 },
     sentiment: "neutral",
     flagged: false,
   },
@@ -222,7 +213,7 @@ export const mockFeedItems: FeedItem[] = [
     author: { name: "u/conspiracy_theorist", image: "/placeholder-user.jpg" },
     content: "Theory: The government is hiding evidence of alien life",
     timestamp: "1 day ago",
-    engagement: { likes: 1500, shares: 300, comments: 2000 },
+    engagement: { likes: 1500, views: 6000, comments: 2000 },
     sentiment: "neutral",
     flagged: true,
   },

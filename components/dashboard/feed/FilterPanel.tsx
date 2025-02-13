@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Facebook,
   Instagram,
   Youtube,
-  MessageCircle,
+  Twitter,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -30,10 +29,9 @@ import {
 } from "@/components/ui/accordion";
 
 const platforms = [
-  { name: "Facebook", icon: Facebook },
+  { name: "Twitter", icon: Twitter },
   { name: "Instagram", icon: Instagram },
-  { name: "YouTube", icon: Youtube },
-  { name: "Reddit", icon: MessageCircle },
+  { name: "Youtube", icon: Youtube },
 ];
 
 interface Filters {
