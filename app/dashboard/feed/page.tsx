@@ -92,6 +92,13 @@ export default function MediaFeedPage() {
     hasPrevPage: false,
   });
 
+  const [summaryStats, setSummaryStats] = useState({
+    totalPosts: 0,
+    totalFlagged: 0,
+    filteredTotal: 0,
+    filteredFlagged: 0,
+  });
+
   // Fetch posts only when filters or page changes
   useEffect(() => {
     fetchPosts(currentPage);
@@ -192,6 +199,14 @@ export default function MediaFeedPage() {
       }));
       setPagination(paginationData);
       
+      // Update summary stats
+      setSummaryStats({
+        totalPosts: paginationData.totalPosts,
+        totalFlagged: paginationData.totalFlaggedPosts,
+        filteredTotal: paginationData.filteredTotal,
+        filteredFlagged: paginationData.filteredFlagged,
+      });
+
       // Update URL with current filters and page
       updateUrlWithFilters(currentFilters, page);
       
@@ -258,8 +273,10 @@ export default function MediaFeedPage() {
       <motion.div className="w-full md:w-1/4" variants={itemVariants}>
         <SummaryWidget 
           filters={filters}
-          totalPosts={apiData.feedItems?.length ?? 0}
-          flaggedPosts={apiData.feedItems?.filter(item => item.flagged).length ?? 0}
+          totalPosts={summaryStats.totalPosts}
+          flaggedPosts={summaryStats.totalFlagged}
+          filteredTotal={summaryStats.filteredTotal}
+          filteredFlagged={summaryStats.filteredFlagged}
         />
       </motion.div>
     </motion.div>

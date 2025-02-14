@@ -10,10 +10,10 @@ interface Filters {
 
 interface SummaryWidgetProps {
   filters: Filters;
-  totalPosts: number;    // This will be totalAllPosts
-  flaggedPosts: number;  // This will be totalAllFlagged
-  filteredTotal?: number;
-  filteredFlagged?: number;
+  totalPosts: number;
+  flaggedPosts: number;
+  filteredTotal: number;
+  filteredFlagged: number;
 }
 
 export default function SummaryWidget({ 
@@ -58,13 +58,13 @@ export default function SummaryWidget({
                 Key Metrics
               </h3>
               <ul className="mt-2 text-sm">
-                <li>Total Posts: {totalPosts}</li>
-                <li>Flagged Posts: {flaggedPosts}</li>
-                {filteredTotal !== undefined && (
-                  <li>Filtered Posts: {filteredTotal}</li>
-                )}
-                {filteredFlagged !== undefined && (
-                  <li>Filtered Flagged: {filteredFlagged}</li>
+                {Object.entries(filters).some(([_, value]) => 
+                  Array.isArray(value) ? value.length > 0 : Boolean(value)
+                ) && (
+                  <>
+                    <li>Total Posts: {filteredTotal}</li>
+                    <li>Flagged Posts: {filteredFlagged}</li>
+                  </>
                 )}
               </ul>
             </div>
