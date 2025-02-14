@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import FilterPanel from "@/components/dashboard/feed/FilterPanel";
 import FeedList from "@/components/dashboard/feed/FeedList";
@@ -51,7 +51,8 @@ interface ApiData {
   feedItems: FeedItem[];
 }
 
-export default function MediaFeedPage() {
+// Separate the main content into a new component
+function MediaFeedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -311,5 +312,14 @@ export default function MediaFeedPage() {
         />
       </motion.div>
     </motion.div>
+  );
+}
+
+// Main page component with Suspense wrapper
+export default function MediaFeedPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MediaFeedContent />
+    </Suspense>
   );
 }
