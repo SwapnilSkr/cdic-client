@@ -14,22 +14,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { mockTopics, type Topic } from "@/utils/mockTopics";
+import { Topic } from "@/utils/types";
 
 const ITEMS_PER_PAGE = 5;
 
 interface TopicsListProps {
+  topics: Topic[];
   searchTerm: string;
   filter: string | null;
   onSelectTopic: (topicId: string) => void;
+  onUpdateTopic: (topic: Topic) => void;
+  onDeleteTopic: (topicId: string) => void;
 }
 
 export function TopicsList({
+  topics,
   searchTerm,
   filter,
   onSelectTopic,
+  onUpdateTopic,
+  onDeleteTopic,
 }: TopicsListProps) {
-  const [topics, setTopics] = useState<Topic[]>(mockTopics);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredTopics, setFilteredTopics] = useState<Topic[]>([]);
@@ -54,18 +59,10 @@ export function TopicsList({
     setEditingTopic(topic);
   };
 
-  const handleDelete = (topicId: string) => {
-    setTopics(topics.filter((topic) => topic.id !== topicId));
-  };
-
   const handleSubmitEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingTopic) {
-      setTopics(
-        topics.map((topic) =>
-          topic.id === editingTopic.id ? editingTopic : topic
-        )
-      );
+      onUpdateTopic(editingTopic);
       setEditingTopic(null);
     }
   };
@@ -150,9 +147,16 @@ export function TopicsList({
               onClick={() => onSelectTopic(topic.id)}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {topic.name}
-                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm font-medium">
+                    {topic.name}
+                  </CardTitle>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    topic.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {topic.active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
                 <div className="flex space-x-2">
                   <Button
                     variant="ghost"
@@ -169,7 +173,7 @@ export function TopicsList({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(topic.id);
+                      onDeleteTopic(topic.id);
                     }}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -267,6 +271,18 @@ export function TopicsList({
                       tags: e.target.value.split(", "),
                     })
                   }
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="editTopicActive">Active</Label>
+                <input
+                  type="checkbox"
+                  id="editTopicActive"
+                  checked={editingTopic.active}
+                  onChange={(e) =>
+                    setEditingTopic({ ...editingTopic, active: e.target.checked })
+                  }
+                  className="h-4 w-4"
                 />
               </div>
               <Button type="submit">Save Changes</Button>

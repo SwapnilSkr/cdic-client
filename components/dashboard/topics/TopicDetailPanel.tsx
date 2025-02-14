@@ -16,21 +16,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { mockTopics, type Topic } from "@/utils/mockTopics";
+import { Topic } from "@/utils/types";
 
 interface TopicDetailPanelProps {
   selectedTopic: string | null;
+  topics: Topic[];
+  onUpdateTopic: (topic: Topic) => void;
 }
 
-export function TopicDetailPanel({ selectedTopic }: TopicDetailPanelProps) {
+function generateRandomSentimentHistory(days: number) {
+  const history = [];
+  const now = new Date();
+  
+  for (let i = days; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    
+    const positive = Math.floor(Math.random() * 100);
+    const negative = Math.floor(Math.random() * (100 - positive));
+    const neutral = 100 - positive - negative;
+    
+    history.push({
+      date: date.toISOString().split('T')[0],
+      positive,
+      neutral,
+      negative,
+    });
+  }
+  return history;
+}
+
+export function TopicDetailPanel({ selectedTopic, topics, onUpdateTopic }: TopicDetailPanelProps) {
   const [topicDetails, setTopicDetails] = useState<Topic | null>(null);
 
   useEffect(() => {
     if (selectedTopic) {
-      const topic = mockTopics.find((t) => t.id === selectedTopic);
+      const topic = topics.find((t) => t.id === selectedTopic);
+      if (topic && topic.sentimentHistory.length === 0) {
+        topic.sentimentHistory = generateRandomSentimentHistory(30);
+      }
       setTopicDetails(topic || null);
     }
-  }, [selectedTopic]);
+  }, [selectedTopic, topics]);
 
   if (!selectedTopic || !topicDetails) {
     return (
@@ -71,20 +98,6 @@ export function TopicDetailPanel({ selectedTopic }: TopicDetailPanelProps) {
                   className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full"
                 >
                   {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Keywords</h3>
-            <div className="flex flex-wrap gap-2">
-              {topicDetails.keywords.map((keyword) => (
-                <span
-                  key={keyword}
-                  className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full"
-                >
-                  {keyword}
                 </span>
               ))}
             </div>
