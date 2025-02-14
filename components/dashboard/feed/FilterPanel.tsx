@@ -27,12 +27,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { type DateRange } from "react-day-picker";
+import { addDays } from "date-fns";
 
-const platforms = [
-  { name: "Twitter", icon: Twitter },
-  { name: "Instagram", icon: Instagram },
-  { name: "Youtube", icon: Youtube },
-];
+interface PlatformData {
+  name: string;
+  icon: any; // Using 'any' for brevity, you might want to type this properly
+}
+
+interface ApiData {
+  platforms: PlatformData[];
+  languages: { value: string; label: string }[];
+  // Add other API data structures as needed
+}
 
 interface Filters {
   platforms: string[];
@@ -46,10 +53,35 @@ interface Filters {
 interface FilterPanelProps {
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
+  apiData: ApiData;
 }
 
-export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
+export default function FilterPanel({ filters, setFilters, apiData }: FilterPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [tempDateRange, setTempDateRange] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 7),
+  });
+
+  const handleDateRangeSet = () => {
+    if (tempDateRange?.from && tempDateRange?.to) {
+      setFilters({
+        ...filters,
+        dateRange: {
+          start: tempDateRange.from,
+          end: tempDateRange.to
+        }
+      });
+    }
+  };
+
+  const clearDateRange = () => {
+    setTempDateRange(undefined);
+    setFilters({
+      ...filters,
+      dateRange: { start: null, end: null }
+    });
+  };
 
   return (
     <motion.div
@@ -82,7 +114,7 @@ export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
               <AccordionTrigger>Platforms</AccordionTrigger>
               <AccordionContent>
                 <div className="flex flex-wrap gap-2">
-                  {platforms.map((platform) => (
+                  {apiData.platforms.map((platform) => (
                     <Button
                       key={platform.name}
                       variant={
@@ -110,7 +142,31 @@ export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
             <AccordionItem value="dateRange">
               <AccordionTrigger>Date Range</AccordionTrigger>
               <AccordionContent>
-                <DatePickerWithRange className="w-full" />
+                <div className="space-y-4">
+                  <DatePickerWithRange 
+                    date={tempDateRange}
+                    setDate={setTempDateRange}
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleDateRangeSet}
+                      disabled={!tempDateRange?.from || !tempDateRange?.to}
+                    >
+                      Set Date Range
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={clearDateRange}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                  {filters.dateRange.start && filters.dateRange.end && (
+                    <p className="text-sm text-muted-foreground">
+                      Active Range: {filters.dateRange.start.toLocaleDateString()} - {filters.dateRange.end.toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="language">
@@ -125,10 +181,11 @@ export default function FilterPanel({ filters, setFilters }: FilterPanelProps) {
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="fr">French</SelectItem>
-                    {/* Add more languages as needed */}
+                    {apiData.languages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </AccordionContent>

@@ -8,10 +8,22 @@ interface Filters {
   sortBy?: string;
 }
 
-export default function SummaryWidget({ filters }: { filters: Filters }) {
+interface SummaryWidgetProps {
+  filters: Filters;
+  totalPosts: number;    // This will be totalAllPosts
+  flaggedPosts: number;  // This will be totalAllFlagged
+  filteredTotal?: number;
+  filteredFlagged?: number;
+}
+
+export default function SummaryWidget({ 
+  filters, 
+  totalPosts, 
+  flaggedPosts,
+  filteredTotal,
+  filteredFlagged 
+}: SummaryWidgetProps) {
   // This is a simplified example. In a real application, you'd calculate these based on actual data.
-  const totalPosts = 1234;
-  const flaggedPosts = 56;
   const averageSentiment = "Positive";
 
   return (
@@ -48,7 +60,12 @@ export default function SummaryWidget({ filters }: { filters: Filters }) {
               <ul className="mt-2 text-sm">
                 <li>Total Posts: {totalPosts}</li>
                 <li>Flagged Posts: {flaggedPosts}</li>
-                <li>Average Sentiment: {averageSentiment}</li>
+                {filteredTotal !== undefined && (
+                  <li>Filtered Posts: {filteredTotal}</li>
+                )}
+                {filteredFlagged !== undefined && (
+                  <li>Filtered Flagged: {filteredFlagged}</li>
+                )}
               </ul>
             </div>
           </div>

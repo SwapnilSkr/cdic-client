@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import FilterPanel from "@/components/dashboard/feed/FilterPanel";
 import FeedList from "@/components/dashboard/feed/FeedList";
 import SummaryWidget from "@/components/dashboard/feed/SummaryWidget";
+import { Twitter, Instagram, Youtube } from "lucide-react";
+import { type FeedItem } from "@/utils/mockFeedItems";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -33,15 +36,201 @@ interface Filters {
   sortBy: string;
 }
 
+// Add these interfaces for API data
+interface PlatformData {
+  name: string;
+  icon: any; // Using 'any' for brevity, you might want to type this properly
+}
+
+interface ApiData {
+  platforms: PlatformData[];
+  languages: { value: string; label: string }[];
+  feedItems: FeedItem[];
+}
+
 export default function MediaFeedPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Initialize with URL params
+  const currentPage = parseInt(searchParams.get('page') || '1');
+  
   const [filters, setFilters] = useState<Filters>({
-    platforms: [],
-    dateRange: { start: null, end: null },
-    language: "",
-    sentiment: "",
-    flagStatus: "",
-    sortBy: "recent",
+    platforms: searchParams.get('platforms')?.split(',') || [],
+    dateRange: {
+      start: searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : null,
+      end: searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : null,
+    },
+    language: searchParams.get('language') || "",
+    sentiment: searchParams.get('sentiment') || "",
+    flagStatus: searchParams.get('flagStatus') || "",
+    sortBy: searchParams.get('sortBy') || "recent",
   });
+
+  const [apiData, setApiData] = useState<ApiData>({
+    platforms: [
+      { name: "Twitter", icon: Twitter },
+      { name: "Instagram", icon: Instagram },
+      { name: "Youtube", icon: Youtube },
+    ],
+    languages: [
+      { value: "en", label: "English" },
+      { value: "es", label: "Spanish" },
+      { value: "fr", label: "French" },
+    ],
+    feedItems: [],
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    currentPage: parseInt(searchParams.get('page') || '1'),
+    totalPages: 1,
+    totalPosts: 0,
+    limit: 5,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+
+  // Fetch posts only when filters or page changes
+  useEffect(() => {
+    fetchPosts(currentPage);
+  }, [currentPage, filters]); // Remove pagination from dependency
+
+  // Update URL separately
+  const updateUrlWithFilters = (newFilters: Filters, page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    // Update filter params
+    if (newFilters.platforms.length > 0) {
+      params.set('platforms', newFilters.platforms.join(','));
+    } else {
+      params.delete('platforms');
+    }
+    
+    if (newFilters.dateRange.start && newFilters.dateRange.end) {
+      params.set('startDate', newFilters.dateRange.start.toISOString());
+      params.set('endDate', newFilters.dateRange.end.toISOString());
+    } else {
+      params.delete('startDate');
+      params.delete('endDate');
+    }
+    
+    if (newFilters.flagStatus) {
+      params.set('flagStatus', newFilters.flagStatus);
+    } else {
+      params.delete('flagStatus');
+    }
+    
+    if (newFilters.sortBy) {
+      params.set('sortBy', newFilters.sortBy);
+    } else {
+      params.delete('sortBy');
+    }
+    
+    params.set('page', page.toString());
+    
+    // Use replace instead of push to avoid adding to history
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    updateUrlWithFilters(filters, newPage);
+  };
+
+  const handleFilterChange = (newFilters: Filters) => {
+    setFilters(newFilters);
+    updateUrlWithFilters(newFilters, 1); // Reset to page 1 when filters change
+  };
+
+  const fetchPosts = async (page: number, currentFilters = filters) => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: pagination.limit.toString(),
+      });
+
+      // Add filter parameters
+      if (currentFilters.platforms.length > 0) {
+        queryParams.set('platforms', currentFilters.platforms.join(','));
+      }
+
+      // Only add date range if both dates are set
+      if (currentFilters.dateRange.start && currentFilters.dateRange.end) {
+        // Format dates as ISO strings
+        const dateRange = {
+          start: currentFilters.dateRange.start.toISOString(),
+          end: currentFilters.dateRange.end.toISOString()
+        };
+        queryParams.set('dateRange', JSON.stringify(dateRange));
+      }
+
+      if (currentFilters.flagStatus) {
+        queryParams.set('flagStatus', currentFilters.flagStatus);
+      }
+      if (currentFilters.sortBy) {
+        queryParams.set('sortBy', currentFilters.sortBy);
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/all?${queryParams}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      
+      const { data, pagination: paginationData } = await response.json();
+      
+      setApiData(prev => ({
+        ...prev,
+        feedItems: data
+      }));
+      setPagination(paginationData);
+      
+      // Update URL with current filters and page
+      updateUrlWithFilters(currentFilters, page);
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleFlag = async (id: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/toggle-flag/${id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to toggle flag");
+      
+      const { flagged } = await response.json();
+      
+      setApiData(prev => ({
+        ...prev,
+        feedItems: prev.feedItems.map((item) =>
+          item.id.toString() === id ? { ...item, flagged } : item
+        )
+      }));
+
+      // Refetch to update summary counts
+      fetchPosts(pagination.currentPage);
+    } catch (error) {
+      console.error('Error toggling flag:', error);
+    }
+  };
 
   return (
     <motion.div
@@ -51,11 +240,27 @@ export default function MediaFeedPage() {
       animate="visible"
     >
       <motion.div className="w-full md:w-3/4" variants={itemVariants}>
-        <FilterPanel filters={filters} setFilters={setFilters} />
-        <FeedList filters={filters} />
+        <FilterPanel 
+          filters={filters} 
+          setFilters={setFilters} 
+          apiData={apiData}
+        />
+        <FeedList 
+          filters={filters} 
+          items={apiData.feedItems}
+          loading={loading}
+          error={error}
+          toggleFlag={(id: number) => toggleFlag(id.toString())}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+        />
       </motion.div>
       <motion.div className="w-full md:w-1/4" variants={itemVariants}>
-        <SummaryWidget filters={filters} />
+        <SummaryWidget 
+          filters={filters}
+          totalPosts={apiData.feedItems?.length ?? 0}
+          flaggedPosts={apiData.feedItems?.filter(item => item.flagged).length ?? 0}
+        />
       </motion.div>
     </motion.div>
   );

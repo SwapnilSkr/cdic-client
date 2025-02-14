@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ThumbsUp,
@@ -25,8 +25,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { type FeedItem } from "@/utils/mockFeedItems";
-
-const ITEMS_PER_PAGE = 5;
 
 // Update the platformIcons definition to use proper type safety
 type PlatformIconType = {
@@ -53,49 +51,35 @@ const formatDate = (timestamp: string) => {
   });
 };
 
-export default function FeedList({ filters }: { filters: any }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [items, setItems] = useState<FeedItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface FeedListProps {
+  filters: any;
+  items: FeedItem[];
+  loading: boolean;
+  error: string | null;
+  toggleFlag: (id: number) => void;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalPosts: number;
+    limit: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  onPageChange: (page: number) => void;
+}
+
+export default function FeedList({ 
+  filters, 
+  items, 
+  loading, 
+  error, 
+  toggleFlag,
+  pagination,
+  onPageChange 
+}: FeedListProps) {
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/posts/all`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch posts");
-        }
-        const data = await response.json();
-        if (data.data && Array.isArray(data.data)) {
-          setItems(data.data);
-        } else {
-          throw new Error("Invalid data format received");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        console.error("Error fetching posts:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
-
-  const toggleFlag = (id: number) => {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, flagged: !item.flagged } : item
-      )
-    );
-  };
-
-  // Apply filters (this is a simplified example)
+  // Apply filters only (no pagination)
   const filteredItems = items.filter(
     (item) =>
       (!filters.platforms.length ||
@@ -105,17 +89,11 @@ export default function FeedList({ filters }: { filters: any }) {
         (filters.flagStatus === "flagged") === item.flagged)
   );
 
-  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
-  const paginatedItems = filteredItems.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
   const renderPaginationButtons = () => {
     const buttons = [];
-    const maxButtons = 10;
-    let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-    const end = Math.min(totalPages, start + maxButtons - 1);
+    const maxButtons = 5;
+    let start = Math.max(1, pagination.currentPage - Math.floor(maxButtons / 2));
+    const end = Math.min(pagination.totalPages, start + maxButtons - 1);
 
     if (end - start + 1 < maxButtons) {
       start = Math.max(1, end - maxButtons + 1);
@@ -124,22 +102,26 @@ export default function FeedList({ filters }: { filters: any }) {
     // First page button
     if (start > 1) {
       buttons.push(
-        <Button variant="outline" size="sm" onClick={() => setCurrentPage(1)}>
+        <Button 
+          key="1" 
+          variant="outline" 
+          size="sm" 
+          onClick={() => onPageChange(1)}
+        >
           1
         </Button>
       );
-      if (start > 2) {
-        buttons.push(<span>...</span>);
-      }
+      if (start > 2) buttons.push(<span key="start-dots">...</span>);
     }
 
     // Numbered buttons
     for (let i = start; i <= end; i++) {
       buttons.push(
         <Button
-          variant={i === currentPage ? "default" : "outline"}
+          key={i}
+          variant={i === pagination.currentPage ? "default" : "outline"}
           size="sm"
-          onClick={() => setCurrentPage(i)}
+          onClick={() => onPageChange(i)}
         >
           {i}
         </Button>
@@ -147,28 +129,23 @@ export default function FeedList({ filters }: { filters: any }) {
     }
 
     // Last page button
-    if (end < totalPages) {
-      if (end < totalPages - 1) {
-        buttons.push(<span>...</span>);
+    if (end < pagination.totalPages) {
+      if (end < pagination.totalPages - 1) {
+        buttons.push(<span key="end-dots">...</span>);
       }
       buttons.push(
         <Button
+          key={pagination.totalPages}
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage(totalPages)}
+          onClick={() => onPageChange(pagination.totalPages)}
         >
-          {totalPages}
+          {pagination.totalPages}
         </Button>
       );
     }
 
-    return (
-      <div className="flex justify-center items-center space-x-2">
-        {buttons.map((button, index) => (
-          <div key={`page-${index}`}>{button}</div>
-        ))}
-      </div>
-    );
+    return buttons;
   };
 
   const getContentTypeIcon = (contentType: string) => {
@@ -197,7 +174,7 @@ export default function FeedList({ filters }: { filters: any }) {
   return (
     <div>
       <AnimatePresence>
-        {paginatedItems.map((item) => {
+        {filteredItems.map((item) => {
           const PlatformIcon = platformIcons[item.platform] || MessageCircle;
           const engagement = item.engagement || {
             likes: 0,
@@ -353,23 +330,26 @@ export default function FeedList({ filters }: { filters: any }) {
           );
         })}
       </AnimatePresence>
+      
       <div className="flex justify-center items-center space-x-2 mt-4">
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-          disabled={currentPage === 1}
+          onClick={() => onPageChange(pagination.currentPage - 1)}
+          disabled={!pagination.hasPrevPage}
         >
           Previous
         </Button>
-        {renderPaginationButtons()}
+        
+        <div className="flex items-center space-x-2">
+          {renderPaginationButtons()}
+        </div>
+        
         <Button
           variant="outline"
           size="sm"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-          }
-          disabled={currentPage === totalPages}
+          onClick={() => onPageChange(pagination.currentPage + 1)}
+          disabled={!pagination.hasNextPage}
         >
           Next
         </Button>
