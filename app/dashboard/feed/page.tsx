@@ -34,6 +34,7 @@ interface Filters {
   sentiment: string;
   flagStatus: string;
   sortBy: string;
+  keyword?: string;
 }
 
 // Add these interfaces for API data
@@ -65,6 +66,7 @@ export default function MediaFeedPage() {
     sentiment: searchParams.get('sentiment') || "",
     flagStatus: searchParams.get('flagStatus') || "",
     sortBy: searchParams.get('sortBy') || "recent",
+    keyword: searchParams.get('keyword') || "",
   });
 
   const [apiData, setApiData] = useState<ApiData>({
@@ -99,10 +101,25 @@ export default function MediaFeedPage() {
     filteredFlagged: 0,
   });
 
-  // Fetch posts only when filters or page changes
+  // Add a separate effect to handle search parameter changes
   useEffect(() => {
-    fetchPosts(currentPage);
-  }, [currentPage, filters]); // Remove pagination from dependency
+    const urlKeyword = searchParams.get('keyword') || '';
+    
+    if (urlKeyword !== filters.keyword) {
+      handleFilterChange({
+        ...filters,
+        keyword: urlKeyword
+      });
+    }
+  }, [searchParams.get('keyword')]); // Only depend on the keyword parameter
+
+  // Keep the original effect for pagination
+  useEffect(() => {
+    const urlPage = searchParams.get('page') || '1';
+    if (parseInt(urlPage) === currentPage) {
+      fetchPosts(currentPage);
+    }
+  }, [currentPage, filters]); // Keep original dependencies
 
   // Update URL separately
   const updateUrlWithFilters = (newFilters: Filters, page: number) => {
@@ -113,6 +130,13 @@ export default function MediaFeedPage() {
       params.set('platforms', newFilters.platforms.join(','));
     } else {
       params.delete('platforms');
+    }
+    
+    // Add keyword to URL params
+    if (newFilters.keyword) {
+      params.set('keyword', newFilters.keyword);
+    } else {
+      params.delete('keyword');
     }
     
     if (newFilters.dateRange.start && newFilters.dateRange.end) {
@@ -161,6 +185,11 @@ export default function MediaFeedPage() {
       // Add filter parameters
       if (currentFilters.platforms.length > 0) {
         queryParams.set('platforms', currentFilters.platforms.join(','));
+      }
+
+      // Add keyword if it exists
+      if (currentFilters.keyword) {
+        queryParams.set('keyword', currentFilters.keyword);
       }
 
       // Only add date range if both dates are set
