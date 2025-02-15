@@ -31,16 +31,40 @@ export default function AIChatPage() {
       setInput("");
       setIsLoading(true);
 
-      // Simulate AI response delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: messages.concat(userMessage).map(msg => ({
+              role: msg.role === 'ai' ? 'assistant' : msg.role,
+              content: msg.content
+            }))
+          }),
+        });
 
-      const aiMessage: Message = {
-        role: "ai",
-        content:
-          "This is a mock AI response. In a real application, you would integrate with an AI service here.",
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsLoading(false);
+        if (!response.ok) {
+          throw new Error('Failed to get AI response');
+        }
+
+        const data = await response.json();
+        const aiMessage: Message = {
+          role: "ai",
+          content: data.message.content,
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      } catch (error) {
+        console.error('Error:', error);
+        const errorMessage: Message = {
+          role: "ai",
+          content: "Sorry, I encountered an error. Please try again.",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

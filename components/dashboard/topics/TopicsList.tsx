@@ -50,13 +50,13 @@ export function TopicsList({
   useEffect(() => {
     const filtered = topics.filter((topic) => {
       const matchesSearch =
-        topic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        topic.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        topic.tags.some((tag) =>
-          tag.toLowerCase().includes(searchTerm.toLowerCase())
+        topic?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        topic?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        topic?.tags?.some((tag) =>
+          tag?.toLowerCase().includes(searchTerm.toLowerCase())
         );
       const matchesFilter =
-        !filter || filter === "all" || topic.tags.includes(filter);
+        !filter || filter === "all" || topic?.tags?.includes(filter);
       return matchesSearch && matchesFilter;
     });
     setFilteredTopics(filtered);
@@ -64,8 +64,8 @@ export function TopicsList({
 
   const handleEdit = async () => {
     if (editingTopic) {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics/${editingTopic._id}`, {
-        method: "PUT",
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/upload`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },

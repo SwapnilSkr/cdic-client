@@ -45,13 +45,16 @@ useEffect(() => {
   router.push(`${pathname}?${new URLSearchParams({ ...Object.fromEntries(searchParams), page: currentPage.toString() })}`);
 }, [currentPage, pathname, searchParams, router]);
   
-  const handleAddTopic = (newTopic: Omit<Topic, "id" | "createdAt">) => {
+  const handleAddTopic = async (newTopic: Omit<Topic, "id" | "createdAt">) => {
     const topic: Topic = {
       ...newTopic,
       _id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     };
     setTopics((prev) => [...prev, topic]);
+    
+    // Re-fetch topics to ensure the list is updated
+    await fetchTopics(currentPage);
   };
 
   const handleUpdateTopic = (updatedTopic: Topic) => {

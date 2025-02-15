@@ -14,7 +14,7 @@ const navItems = [
   { name: "Dashboard", icon: Home, href: "/dashboard" },
   { name: "Media Feed", icon: Rss, href: "/dashboard/feed" },
   { name: "Topics", icon: Hash, href: "/dashboard/topics" },
-  { name: "Flagged Content", icon: Flag, href: "/dashboard/flagged" },
+  // { name: "Flagged Content", icon: Flag, href: "/dashboard/flagged" },
   { name: "Reporting", icon: BarChart2, href: "/dashboard/reporting" },
   { name: "Ask AI", icon: MessageSquare, href: "/dashboard/ai-chat" },
   { name: "Handles", icon: AtSign, href: "/dashboard/handles" },
