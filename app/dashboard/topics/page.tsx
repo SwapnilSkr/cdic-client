@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { TopicsList } from "@/components/dashboard/topics/TopicsList";
 import { SearchAndFilter } from "@/components/dashboard/topics/SearchAndFilter";
@@ -9,7 +9,7 @@ import { TopicDetailPanel } from "@/components/dashboard/topics/TopicDetailPanel
 import { Topic } from "@/utils/types";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
-export default function TopicsPage() {
+function TopicsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -119,3 +119,11 @@ useEffect(() => {
     </motion.div>
   );
 }
+
+export default function TopicsPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TopicsPage />
+    </Suspense>
+  );
+} 
