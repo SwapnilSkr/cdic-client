@@ -28,9 +28,9 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
     active: true,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newTopic: Omit<Topic, "id" | "createdAt"> = {
+    const newTopic: Omit<Topic, "_id" | "createdAt"> = {
       name: formData.name,
       description: formData.description,
       tags: formData.tags.split(",").map((tag) => tag.trim()),
@@ -43,9 +43,29 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
       },
       sentimentHistory: [],
     };
-    onAddTopic(newTopic);
-    setFormData({ name: "", description: "", tags: "", active: true });
-    setIsOpen(false);
+
+    // API call to create a new topic
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newTopic),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create topic");
+      }
+
+      const createdTopic = await response.json();
+      onAddTopic(createdTopic); // Call the onAddTopic prop with the created topic
+      setFormData({ name: "", description: "", tags: "", active: true });
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error creating topic:", error);
+      // Handle error (e.g., show a notification)
+    }
   };
 
   return (

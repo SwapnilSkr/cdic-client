@@ -51,7 +51,7 @@ export function TopicDetailPanel({ selectedTopic, topics, onUpdateTopic }: Topic
 
   useEffect(() => {
     if (selectedTopic) {
-      const topic = topics.find((t) => t.id === selectedTopic);
+      const topic = topics.find((t) => t._id === selectedTopic);
       if (topic && topic.sentimentHistory.length === 0) {
         topic.sentimentHistory = generateRandomSentimentHistory(30);
       }

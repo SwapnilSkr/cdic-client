@@ -1,5 +1,5 @@
 export interface Topic {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   tags: string[];

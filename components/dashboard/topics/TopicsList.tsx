@@ -23,8 +23,17 @@ interface TopicsListProps {
   searchTerm: string;
   filter: string | null;
   onSelectTopic: (topicId: string) => void;
-  onUpdateTopic: (topic: Topic) => void;
+  onUpdateTopic: (updatedTopic: Topic) => void;
   onDeleteTopic: (topicId: string) => void;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalTopics: number;
+    limit: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  onPageChange: (page: number) => void;
 }
 
 export function TopicsList({
@@ -34,9 +43,10 @@ export function TopicsList({
   onSelectTopic,
   onUpdateTopic,
   onDeleteTopic,
+  pagination,
+  onPageChange,
 }: TopicsListProps) {
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [filteredTopics, setFilteredTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
@@ -52,78 +62,88 @@ export function TopicsList({
       return matchesSearch && matchesFilter;
     });
     setFilteredTopics(filtered);
-    setCurrentPage(1);
   }, [topics, searchTerm, filter]);
 
-  const handleEdit = (topic: Topic) => {
-    setEditingTopic(topic);
-  };
-
-  const handleSubmitEdit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEdit = async () => {
     if (editingTopic) {
-      onUpdateTopic(editingTopic);
-      setEditingTopic(null);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics/${editingTopic._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editingTopic),
+      });
+
+      if (response.ok) {
+        const updatedTopic = await response.json();
+        onUpdateTopic(updatedTopic);
+        setEditingTopic(null); // Close the edit form
+      }
     }
   };
 
-  const totalPages = Math.ceil(filteredTopics.length / ITEMS_PER_PAGE);
-  const paginatedTopics = filteredTopics.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const handleDelete = async (topicId: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics/${topicId}`, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      onDeleteTopic(topicId);
+    }
+  };
 
   const renderPaginationButtons = () => {
     const buttons = [];
     const maxButtons = 5;
-    let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-    const end = Math.min(totalPages, start + maxButtons - 1);
+    let start = Math.max(1, pagination.currentPage - Math.floor(maxButtons / 2));
+    const end = Math.min(pagination.totalPages, start + maxButtons - 1);
 
     if (end - start + 1 < maxButtons) {
       start = Math.max(1, end - maxButtons + 1);
     }
 
+    // First page button
     if (start > 1) {
       buttons.push(
-        <Button
-          key="first"
-          variant="outline"
-          size="sm"
-          onClick={() => setCurrentPage(1)}
+        <Button 
+          key="1" 
+          variant="outline" 
+          size="sm" 
+          onClick={() => onPageChange(1)}
         >
           1
         </Button>
       );
-      if (start > 2) {
-        buttons.push(<span key="ellipsis1">...</span>);
-      }
+      if (start > 2) buttons.push(<span key="start-dots">...</span>);
     }
 
+    // Numbered buttons
     for (let i = start; i <= end; i++) {
       buttons.push(
         <Button
           key={i}
-          variant={i === currentPage ? "default" : "outline"}
+          variant={i === pagination.currentPage ? "default" : "outline"}
           size="sm"
-          onClick={() => setCurrentPage(i)}
+          onClick={() => onPageChange(i)}
         >
           {i}
         </Button>
       );
     }
 
-    if (end < totalPages) {
-      if (end < totalPages - 1) {
-        buttons.push(<span key="ellipsis2">...</span>);
+    // Last page button
+    if (end < pagination.totalPages) {
+      if (end < pagination.totalPages - 1) {
+        buttons.push(<span key="end-dots">...</span>);
       }
       buttons.push(
         <Button
-          key="last"
+          key={pagination.totalPages}
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage(totalPages)}
+          onClick={() => onPageChange(pagination.totalPages)}
         >
-          {totalPages}
+          {pagination.totalPages}
         </Button>
       );
     }
@@ -134,9 +154,9 @@ export function TopicsList({
   return (
     <div className="space-y-4">
       <AnimatePresence>
-        {paginatedTopics.map((topic) => (
+        {filteredTopics.map((topic) => (
           <motion.div
-            key={topic.id}
+            key={topic._id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -144,7 +164,7 @@ export function TopicsList({
           >
             <Card
               className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => onSelectTopic(topic.id)}
+              onClick={() => onSelectTopic(topic._id)}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-2">
@@ -163,7 +183,7 @@ export function TopicsList({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleEdit(topic);
+                      setEditingTopic(topic);
                     }}
                   >
                     <Edit2 className="h-4 w-4" />
@@ -173,7 +193,7 @@ export function TopicsList({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDeleteTopic(topic.id);
+                      handleDelete(topic._id);
                     }}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -212,19 +232,21 @@ export function TopicsList({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-          disabled={currentPage === 1}
+          onClick={() => onPageChange(pagination.currentPage - 1)}
+          disabled={!pagination.hasPrevPage}
         >
           Previous
         </Button>
-        {renderPaginationButtons()}
+        
+        <div className="flex items-center space-x-2">
+          {renderPaginationButtons()}
+        </div>
+        
         <Button
           variant="outline"
           size="sm"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-          }
-          disabled={currentPage === totalPages}
+          onClick={() => onPageChange(pagination.currentPage + 1)}
+          disabled={!pagination.hasNextPage}
         >
           Next
         </Button>
@@ -236,7 +258,7 @@ export function TopicsList({
             <DialogTitle>Edit Topic</DialogTitle>
           </DialogHeader>
           {editingTopic && (
-            <form onSubmit={handleSubmitEdit} className="space-y-4">
+            <form onSubmit={handleEdit} className="space-y-4">
               <div>
                 <Label htmlFor="editTopicName">Topic Name</Label>
                 <Input
