@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RegistrationForm } from "@/components/registration-form";
+import Image from "next/image";
+import Logo from "@/public/productLogo.png";
 
 export const metadata: Metadata = {
   title: "Register | Centralized Media Monitoring & Fact-Checking Platform",
@@ -18,8 +20,15 @@ export default function RegisterPage() {
       </Link>
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
         <div className="absolute inset-0 bg-zinc-900" />
-        <div className="relative z-20 flex items-center text-lg font-medium">
-          MediaMonitor
+        <div className="relative z-20 flex items-center">
+          <div className="h-[100px] w-auto">
+            <Image
+              src={Logo}
+              alt="Media Monitor Logo"
+              className="h-full w-auto"
+              priority
+            />
+          </div>
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">

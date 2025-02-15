@@ -7,6 +7,8 @@ import type React from "react"; // Added import for React
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import Logo from "@/public/productLogo.png";
+import Image from "next/image";
 
 export default function Header({ children }: { children?: React.ReactNode }) {
   const router = useRouter();
@@ -28,9 +30,14 @@ export default function Header({ children }: { children?: React.ReactNode }) {
     <header className="bg-background border-b py-4 px-6 flex items-center justify-between">
       <div className="flex items-center">
         {children}
-        <h1 className="text-2xl font-bold text-foreground mr-6">
-          Media Monitor
-        </h1>
+        <div className="h-[80px] w-auto mr-6">
+          <Image
+            src={Logo}
+            alt="Media Monitor Logo"
+            className="h-full w-auto"
+            priority
+          />
+        </div>
         <div className="relative hidden sm:flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />

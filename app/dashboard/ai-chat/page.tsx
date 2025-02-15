@@ -22,7 +22,9 @@ export default function AIChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, []); // Updated useEffect dependency
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = async () => {
     if (input.trim()) {
@@ -66,6 +68,28 @@ export default function AIChatPage() {
         setIsLoading(false);
       }
     }
+  };
+
+  const renderMessageContent = (content: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = content.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-600 underline"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
   };
 
   const styles = `
@@ -156,7 +180,7 @@ export default function AIChatPage() {
                             : "bg-secondary text-secondary-foreground"
                         }`}
                       >
-                        {message.content}
+                        {renderMessageContent(message.content)}
                       </div>
                     </div>
                   </motion.div>

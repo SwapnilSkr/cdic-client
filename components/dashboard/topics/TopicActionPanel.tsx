@@ -25,7 +25,7 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
     name: "",
     description: "",
     tags: "",
-    active: true,
+    active: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +34,7 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
       name: formData.name,
       description: formData.description,
       tags: formData.tags.split(",").map((tag) => tag.trim()),
-      active: formData.active,
+      active: false,
       alertThreshold: 75,
       sentiment: {
         positive: 0,
@@ -60,7 +60,7 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
 
       const createdTopic = await response.json();
       onAddTopic(createdTopic); // Call the onAddTopic prop with the created topic
-      setFormData({ name: "", description: "", tags: "", active: true });
+      setFormData({ name: "", description: "", tags: "", active: false });
       setIsOpen(false);
     } catch (error) {
       console.error("Error creating topic:", error);
@@ -112,18 +112,6 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
                   setFormData({ ...formData, tags: e.target.value })
                 }
                 placeholder="Enter tags"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="topicActive">Active</Label>
-              <input
-                type="checkbox"
-                id="topicActive"
-                checked={formData.active}
-                onChange={(e) =>
-                  setFormData({ ...formData, active: e.target.checked })
-                }
-                className="h-4 w-4"
               />
             </div>
             <Button type="submit">Create Topic</Button>

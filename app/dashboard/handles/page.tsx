@@ -278,7 +278,7 @@ export default function HandlesPage() {
             <TableBody>
               {authors.map((handle) => (
                 <TableRow key={handle.author_id}>
-                  <TableCell>{handle.username}</TableCell>
+                  <TableCell onClick={() => window.open(handle.profile_link, '_blank')}>{handle.username}</TableCell>
                   <TableCell>{handle.platform}</TableCell>
                   <TableCell>{handle.followers_count?.toLocaleString() ?? "N/A"}</TableCell>
                   <TableCell>{handle.posts_count?.toLocaleString() ?? "N/A"}</TableCell>
