@@ -16,8 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Topic } from "@/utils/types";
 
-const ITEMS_PER_PAGE = 5;
-
 interface TopicsListProps {
   topics: Topic[];
   searchTerm: string;
@@ -164,7 +162,9 @@ export function TopicsList({
           >
             <Card
               className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => onSelectTopic(topic._id)}
+              onClick={() => {
+                onSelectTopic(topic._id);
+              }}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-2">

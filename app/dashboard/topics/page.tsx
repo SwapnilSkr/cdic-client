@@ -20,7 +20,7 @@ export default function TopicsPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [totalTopics, setTotalTopics] = useState(0);
   const [currentPage, setCurrentPage] = useState<number>(parseInt(queryPage as string) || 1);
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
 
   const fetchTopics = async (page: number) => {
     try {

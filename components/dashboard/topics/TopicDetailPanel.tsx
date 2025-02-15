@@ -61,8 +61,8 @@ export function TopicDetailPanel({ selectedTopic, topics, onUpdateTopic }: Topic
 
   if (!selectedTopic || !topicDetails) {
     return (
-      <Card>
-        <CardContent className="p-6">
+      <Card className="min-h-[500px]">
+        <CardContent className="flex items-center justify-center min-h-full p-6">
           <p className="text-center text-muted-foreground">
             Select a topic to view details
           </p>

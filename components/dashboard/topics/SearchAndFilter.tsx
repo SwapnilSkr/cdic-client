@@ -2,13 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Search } from "lucide-react";
 import { useState } from "react";
 
@@ -46,23 +39,6 @@ export function SearchAndFilter({
           <Search className="h-4 w-4 mr-2" />
           Search
         </Button>
-      </div>
-      <div className="w-full sm:w-1/3">
-        <Select
-          value={filter || "all"}
-          onValueChange={(value) => setFilter(value || null)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="politics">Politics</SelectItem>
-            <SelectItem value="technology">Technology</SelectItem>
-            <SelectItem value="entertainment">Entertainment</SelectItem>
-            <SelectItem value="sports">Sports</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
     </div>
   );
