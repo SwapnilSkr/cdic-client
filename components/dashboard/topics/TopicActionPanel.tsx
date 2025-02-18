@@ -21,20 +21,23 @@ interface TopicActionPanelProps {
 
 export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     tags: "",
-    active: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     const newTopic: Omit<Topic, "_id" | "createdAt"> = {
       name: formData.name,
       description: formData.description,
       tags: formData.tags.split(",").map((tag) => tag.trim()),
-      active: false,
+      active: true,
       alertThreshold: 75,
       sentiment: {
         positive: 0,
@@ -44,28 +47,40 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
       sentimentHistory: [],
     };
 
-    // API call to create a new topic
     try {
+      // Create topic
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTopic),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create topic");
-      }
+      if (!response.ok) throw new Error("Failed to create topic");
 
       const createdTopic = await response.json();
-      onAddTopic(createdTopic); // Call the onAddTopic prop with the created topic
-      setFormData({ name: "", description: "", tags: "", active: false });
-      setIsOpen(false);
+      onAddTopic(createdTopic);
+      
+      // Show success message
+      setShowSuccess(true);
+      
+      // Trigger post upload in background
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createdTopic),
+      });
+
     } catch (error) {
-      console.error("Error creating topic:", error);
-      // Handle error (e.g., show a notification)
+      console.error("Error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setShowSuccess(false);
+    setFormData({ name: "", description: "", tags: "" });
   };
 
   return (
@@ -77,45 +92,60 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
           </Button>
         </DialogTrigger>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Topic</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="topicName">Topic Name</Label>
-              <Input
-                id="topicName"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="Enter topic name"
-              />
+          {showSuccess ? (
+            <div className="space-y-4 p-4">
+              <h3 className="text-lg font-semibold text-green-600">Topic Created Successfully!</h3>
+              <p className="text-sm text-gray-600">
+                Your topic has been created and data collection has started in the background.
+                You can close this window and continue using the application.
+              </p>
+              <Button onClick={handleClose}>Close</Button>
             </div>
-            <div>
-              <Label htmlFor="topicDescription">Description</Label>
-              <Textarea
-                id="topicDescription"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="Enter topic description"
-              />
-            </div>
-            <div>
-              <Label htmlFor="topicTags">Tags (comma-separated)</Label>
-              <Input
-                id="topicTags"
-                value={formData.tags}
-                onChange={(e) =>
-                  setFormData({ ...formData, tags: e.target.value })
-                }
-                placeholder="Enter tags"
-              />
-            </div>
-            <Button type="submit">Create Topic</Button>
-          </form>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Create New Topic</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="topicName">Topic Name</Label>
+                  <Input
+                    id="topicName"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    placeholder="Enter topic name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="topicDescription">Description</Label>
+                  <Textarea
+                    id="topicDescription"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    placeholder="Enter topic description"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="topicTags">Tags (comma-separated)</Label>
+                  <Input
+                    id="topicTags"
+                    value={formData.tags}
+                    onChange={(e) =>
+                      setFormData({ ...formData, tags: e.target.value })
+                    }
+                    placeholder="Enter tags"
+                  />
+                </div>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Creating..." : "Create Topic"}
+                </Button>
+              </form>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
