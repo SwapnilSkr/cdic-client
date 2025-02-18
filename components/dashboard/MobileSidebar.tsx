@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { LogoutButton } from "./LogoutButton";
 
 const navItems = [
   { name: "Dashboard", icon: Home, href: "/dashboard" },
@@ -62,6 +63,9 @@ export function MobileSidebar({ onClose }: MobileSidebarProps) {
           ))}
         </nav>
       </ScrollArea>
+      <div className="border-t p-4">
+        <LogoutButton />
+      </div>
     </div>
   );
 }

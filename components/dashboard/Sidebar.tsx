@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Home,
@@ -8,7 +10,9 @@ import {
   Users,
   MessageSquare,
   AtSign,
+  LogOut,
 } from "lucide-react";
+import { LogoutButton } from "./LogoutButton";
 
 const navItems = [
   { name: "Dashboard", icon: Home, href: "/dashboard" },
@@ -23,8 +27,8 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="bg-background border-r w-64 min-h-screen p-4">
-      <nav className="space-y-2">
+    <aside className="bg-background border-r w-64 min-h-screen p-4 flex flex-col">
+      <nav className="space-y-2 flex-1">
         {navItems.map((item) => (
           <Link
             key={item.name}
@@ -36,6 +40,9 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
+      <div className="border-t pt-4">
+        <LogoutButton />
+      </div>
     </aside>
   );
 }

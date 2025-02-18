@@ -26,24 +26,26 @@ const itemVariants = {
 
 export default function Dashboard() {
   return (
-    <motion.div
-      className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.div variants={itemVariants}>
-        <OverviewCards />
+    <>
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants}>
+          <OverviewCards />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <MediaFeed />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <AlertPanel />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <SentimentAnalysis />
+        </motion.div>
       </motion.div>
-      <motion.div variants={itemVariants}>
-        <MediaFeed />
-      </motion.div>
-      <motion.div variants={itemVariants}>
-        <AlertPanel />
-      </motion.div>
-      <motion.div variants={itemVariants}>
-        <SentimentAnalysis />
-      </motion.div>
-    </motion.div>
+    </>
   );
 }
