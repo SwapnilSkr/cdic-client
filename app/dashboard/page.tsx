@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import OverviewCards from "@/components/dashboard/OverviewCards";
 import MediaFeed from "@/components/dashboard/MediaFeed";
-import AlertPanel from "@/components/dashboard/AlertPanel";
-import SentimentAnalysis from "@/components/dashboard/SentimentAnalysis";
+import VerificationPanel from "@/components/dashboard/VerificationPanel";
+import AiChatPage from "@/components/dashboard/AiChatPage";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -37,13 +37,13 @@ export default function Dashboard() {
           <OverviewCards />
         </motion.div>
         <motion.div variants={itemVariants}>
+          <VerificationPanel />
+        </motion.div>
+        <motion.div variants={itemVariants}>
           <MediaFeed />
         </motion.div>
         <motion.div variants={itemVariants}>
-          <AlertPanel />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <SentimentAnalysis />
+          <AiChatPage/>
         </motion.div>
       </motion.div>
     </>
