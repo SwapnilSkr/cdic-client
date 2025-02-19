@@ -26,7 +26,7 @@ const itemVariants = {
 export default function Dashboard() {
   return (
     <motion.div
-      className="flex flex-col lg:flex-row gap-6"
+      className="flex flex-col lg:flex-row gap-6 max-h-[calc(100vh-80px)] overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -34,14 +34,14 @@ export default function Dashboard() {
       {/* Left Column - AI Chat */}
       <motion.div 
         variants={itemVariants}
-        className="w-full lg:w-1/2"
+        className="w-full lg:w-1/2 overflow-auto"
       >
         <AiChatPage />
       </motion.div>
 
       {/* Right Column - Verification Panel and Media Feed */}
       <motion.div 
-        className="w-full lg:w-1/2 flex flex-col gap-6"
+        className="w-full lg:w-1/2 flex flex-col gap-6 overflow-auto"
       >
         <motion.div variants={itemVariants}>
           <VerificationPanel />
