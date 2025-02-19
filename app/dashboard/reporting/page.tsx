@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -8,6 +7,7 @@ import { GraphicalAnalytics } from "@/components/dashboard/reporting/GraphicalAn
 import { DetailedReports } from "@/components/dashboard/reporting/DetailedReports";
 import { Button } from "@/components/ui/button";
 import { Download, Mail } from "lucide-react";
+import OverviewCards from "@/components/dashboard/OverviewCards";
 
 export default function ReportingPage() {
   const [filters, setFilters] = useState({
@@ -31,13 +31,18 @@ export default function ReportingPage() {
     >
       <h1 className="text-3xl font-bold">Reporting</h1>
 
+      {/* Overview Cards */}
+      <div className="mb-8">
+        <OverviewCards />
+      </div>
+
       <ReportFilters onFilterChange={handleFilterChange} />
 
       <GraphicalAnalytics />
 
       <DetailedReports filters={filters} />
 
-      <div className="flex space-x-4">
+      <div className="flex flex-wrap gap-4">
         <Button>
           <Download className="mr-2 h-4 w-4" /> Export as CSV
         </Button>

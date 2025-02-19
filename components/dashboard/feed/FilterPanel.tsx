@@ -11,7 +11,9 @@ import {
   Twitter,
   ChevronDown,
   ChevronUp,
+  Facebook,
 } from "lucide-react";
+import { FaReddit } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -35,7 +37,8 @@ import { addDays } from "date-fns";
 
 interface PlatformData {
   name: string;
-  icon: any; // Using 'any' for brevity, you might want to type this properly
+  icon: any;
+  enabled: boolean;
 }
 
 interface ApiData {
@@ -86,6 +89,23 @@ export default function FilterPanel({ filters, setFilters, apiData }: FilterPane
     });
   };
 
+  const allPlatforms: PlatformData[] = [
+    ...apiData.platforms.map(platform => ({
+      ...platform,
+      enabled: true
+    })),
+    { 
+      name: "Reddit", 
+      icon: FaReddit, 
+      enabled: false
+    },
+    { 
+      name: "Facebook", 
+      icon: Facebook, 
+      enabled: false
+    }
+  ];
+
   return (
     <motion.div
       className="bg-card text-card-foreground p-4 rounded-lg shadow-md mb-6"
@@ -117,7 +137,7 @@ export default function FilterPanel({ filters, setFilters, apiData }: FilterPane
               <AccordionTrigger>Platforms</AccordionTrigger>
               <AccordionContent>
                 <div className="flex flex-wrap gap-2">
-                  {apiData.platforms.map((platform) => (
+                  {allPlatforms.map((platform) => (
                     <Button
                       key={platform.name}
                       variant={
@@ -127,6 +147,7 @@ export default function FilterPanel({ filters, setFilters, apiData }: FilterPane
                       }
                       size="sm"
                       onClick={() => {
+                        if (!platform.enabled) return;
                         const newPlatforms = filters.platforms.includes(
                           platform.name
                         )
@@ -134,6 +155,8 @@ export default function FilterPanel({ filters, setFilters, apiData }: FilterPane
                           : [...filters.platforms, platform.name];
                         setFilters({ ...filters, platforms: newPlatforms });
                       }}
+                      disabled={!platform.enabled}
+                      className={!platform.enabled ? "opacity-50 cursor-not-allowed" : ""}
                     >
                       <platform.icon className="mr-1 h-4 w-4" />
                       {platform.name}

@@ -44,7 +44,8 @@ interface Filters {
 // Add these interfaces for API data
 interface PlatformData {
   name: string;
-  icon: any; // Using 'any' for brevity, you might want to type this properly
+  icon: any;
+  enabled?: boolean; // Make enabled optional
 }
 
 interface ApiData {
@@ -290,7 +291,13 @@ function MediaFeedContent() {
         <FilterPanel 
           filters={filters} 
           setFilters={setFilters} 
-          apiData={apiData}
+          apiData={{
+            ...apiData,
+            platforms: apiData.platforms.map(platform => ({
+              ...platform,
+              enabled: platform.enabled ?? false
+            }))
+          }}
         />
         <FeedList 
           filters={filters} 
