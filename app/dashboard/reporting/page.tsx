@@ -31,12 +31,12 @@ export default function ReportingPage() {
     >
       <h1 className="text-3xl font-bold">Reporting</h1>
 
+      <ReportFilters onFilterChange={handleFilterChange} />
+
       {/* Overview Cards */}
       <div className="mb-8">
         <OverviewCards />
       </div>
-
-      <ReportFilters onFilterChange={handleFilterChange} />
 
       <GraphicalAnalytics />
 
