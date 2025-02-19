@@ -55,7 +55,7 @@ export default function MediaFeed() {
 
   if (loading) {
     return (
-      <Card className="h-[600px]">
+      <Card className="h-[400px]">
         <CardHeader>
           <Skeleton className="h-8 w-[300px]" />
         </CardHeader>
@@ -78,7 +78,7 @@ export default function MediaFeed() {
 
   if (!feedItems || feedItems.length === 0) {
     return (
-      <Card className="h-[600px]">
+      <Card className="h-[400px]">
         <CardHeader>
           <CardTitle>Today&apos;s Most Discussed Topics</CardTitle>
         </CardHeader>
