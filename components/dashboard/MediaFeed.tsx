@@ -24,6 +24,7 @@ export default function MediaFeed() {
   const { token } = useUserStore();
 
   useEffect(() => {
+    if (!token) return;
     const fetchFeed = async () => {
       try {
         const response = await fetch(

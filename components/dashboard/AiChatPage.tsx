@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Send, MessageSquare } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useUserStore } from "@/state/user.store";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Message {
   role: "user" | "ai";
@@ -17,7 +19,9 @@ export default function AiChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { token } = useUserStore();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -26,6 +30,36 @@ export default function AiChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (!token) return;
+    const loadChatHistory = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/ai/history`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
+        if (!response.ok) throw new Error('Failed to load chat history');
+        
+        const data = await response.json();
+        setMessages(data.messages.map((msg: any) => ({
+          role: msg.role === 'assistant' ? 'ai' : 'user',
+          content: msg.content
+        })));
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    loadChatHistory();
+  }, [token]);
 
   const handleSendMessage = async () => {
     if (input.trim()) {
@@ -39,6 +73,7 @@ export default function AiChatPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             messages: messages.concat(userMessage).map(msg => ({
@@ -112,6 +147,34 @@ export default function AiChatPage() {
   }
 `;
 
+  if (isInitialLoading) {
+    return (
+      <Card className="h-[400px]">
+        <CardHeader className="border-b p-3 bg-primary">
+          <Skeleton className="h-6 w-32" />
+        </CardHeader>
+        <CardContent className="p-0 flex flex-col h-[calc(400px-3.75rem)]">
+          <div className="flex-grow p-4">
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-start space-x-2">
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                  <Skeleton className="h-16 w-[70%] rounded-lg" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="p-3 bg-muted mt-auto border-t">
+            <div className="flex items-center space-x-2">
+              <Skeleton className="h-9 flex-grow" />
+              <Skeleton className="h-9 w-9" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-[400px]">
       <CardHeader className="border-b p-3 bg-primary">
@@ -133,7 +196,7 @@ export default function AiChatPage() {
                   <MessageSquare className="w-8 h-8 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold mb-2">
-                  Welcome to Media Monitor AI Chat
+                  Welcome to Verideck AI Chat
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   Get instant insights and assistance for your media

@@ -19,6 +19,7 @@ export default function VerificationPanel() {
 
   useEffect(() => {
     const fetchReviewedPosts = async () => {
+      if (!token) return;
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/posts/reviewed`,
