@@ -7,109 +7,47 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockFlaggedItems, type FlaggedItem } from "@/utils/mockFlaggedItems";
 import { DateRange } from "react-day-picker";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FlaggedItemsListProps {
-  filters: {
-    dateRange: DateRange | undefined;
-    flagType: string | null;
-    status: string | null;
-  };
+  items: FlaggedItem[];
+  loading: boolean;
+  error: string | null;
   onSelectItem: (itemId: string) => void;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  onPageChange: (page: number) => void;
 }
 
-const ITEMS_PER_PAGE = 5;
-
 export function FlaggedItemsList({
-  filters,
+  items,
+  loading,
+  error,
   onSelectItem,
+  pagination,
+  onPageChange
 }: FlaggedItemsListProps) {
-  const [items, setItems] = useState<FlaggedItem[]>(mockFlaggedItems);
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    const filteredItems = mockFlaggedItems.filter((item) => {
-      if (filters.dateRange?.from && filters.dateRange?.to) {
-        const itemDate = new Date(item.timestamp);
-        if (
-          itemDate < filters.dateRange.from ||
-          itemDate > filters.dateRange.to
-        ) {
-          return false;
-        }
-      }
-      if (filters.flagType && item.flagReason !== filters.flagType) {
-        return false;
-      }
-      if (filters.status && item.status !== filters.status) {
-        return false;
-      }
-      return true;
-    });
-    setItems(filteredItems);
-    setCurrentPage(1);
-  }, [filters]);
-
-  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-  const paginatedItems = items.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
 
   const renderPaginationButtons = () => {
     const buttons = [];
-    const maxButtons = 10;
-    let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-    const end = Math.min(totalPages, start + maxButtons - 1);
-
-    if (end - start + 1 < maxButtons) {
-      start = Math.max(1, end - maxButtons + 1);
-    }
-
-    if (start > 1) {
-      buttons.push(
-        <Button
-          key="first"
-          variant="outline"
-          size="sm"
-          onClick={() => setCurrentPage(1)}
-        >
-          1
-        </Button>
-      );
-      if (start > 2) {
-        buttons.push(<span key="ellipsis1">...</span>);
-      }
-    }
-
-    for (let i = start; i <= end; i++) {
+    for (let i = 1; i <= pagination.totalPages; i++) {
       buttons.push(
         <Button
           key={i}
-          variant={i === currentPage ? "default" : "outline"}
+          variant={pagination.currentPage === i ? "default" : "outline"}
           size="sm"
-          onClick={() => setCurrentPage(i)}
+          onClick={() => onPageChange(i)}
         >
           {i}
         </Button>
       );
     }
-
-    if (end < totalPages) {
-      if (end < totalPages - 1) {
-        buttons.push(<span key="ellipsis2">...</span>);
-      }
-      buttons.push(
-        <Button
-          key="last"
-          variant="outline"
-          size="sm"
-          onClick={() => setCurrentPage(totalPages)}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
     return buttons;
   };
 
@@ -126,10 +64,41 @@ export function FlaggedItemsList({
     }
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="p-4 space-y-3">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="flex flex-col justify-center items-center p-8 space-y-4">
+        <p className="text-muted-foreground text-lg">No flagged items found</p>
+        <p className="text-sm text-muted-foreground">Items that are flagged will appear here</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <AnimatePresence>
-        {paginatedItems.map((item) => (
+        {items.map((item) => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, y: 20 }}
@@ -142,10 +111,6 @@ export function FlaggedItemsList({
               onClick={() => onSelectItem(item.id)}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <AlertTriangle className="h-4 w-4 mr-2 text-yellow-500" />
-                  {item.flagReason}
-                </CardTitle>
                 <div className="flex items-center space-x-2">
                   {getContentTypeIcon(item.contentType)}
                   <span className="text-xs text-muted-foreground">
@@ -179,27 +144,29 @@ export function FlaggedItemsList({
         ))}
       </AnimatePresence>
 
-      <div className="flex justify-center items-center space-x-2 mt-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </Button>
-        {renderPaginationButtons()}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-          }
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </Button>
-      </div>
+      {items.length > 0 && (
+        <div className="flex justify-center items-center space-x-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(pagination.currentPage - 1)}
+            disabled={!pagination.hasPrevPage}
+          >
+            Previous
+          </Button>
+          <div className="flex items-center space-x-2">
+            {renderPaginationButtons()}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(pagination.currentPage + 1)}
+            disabled={!pagination.hasNextPage}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

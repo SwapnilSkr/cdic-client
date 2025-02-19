@@ -23,13 +23,11 @@ import type { DateRange } from "react-day-picker";
 interface FilterSortPanelProps {
   filters: {
     dateRange: DateRange | undefined;
-    flagType: string | null;
     status: string | null;
   };
   setFilters: Dispatch<
     SetStateAction<{
       dateRange: DateRange | undefined;
-      flagType: string | null;
       status: string | null;
     }>
   >;
@@ -75,28 +73,6 @@ export function FilterSortPanel({ filters, setFilters }: FilterSortPanelProps) {
           />
         </PopoverContent>
       </Popover>
-
-      <Select
-        value={filters.flagType || "all"}
-        onValueChange={(value) =>
-          setFilters((prev) => ({
-            ...prev,
-            flagType: value === "all" ? null : value,
-          }))
-        }
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Flag Type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
-          <SelectItem value="Misinformation">Misinformation</SelectItem>
-          <SelectItem value="Hate Speech">Hate Speech</SelectItem>
-          <SelectItem value="Inappropriate Content">
-            Inappropriate Content
-          </SelectItem>
-        </SelectContent>
-      </Select>
 
       <Select
         value={filters.status || "all"}

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
@@ -10,6 +11,7 @@ import SummaryWidget from "@/components/dashboard/feed/SummaryWidget";
 import { Twitter, Instagram, Youtube } from "lucide-react";
 import { type FeedItem } from "@/utils/mockFeedItems";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useUserStore } from "@/state/user.store";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -55,6 +57,7 @@ interface ApiData {
 function MediaFeedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { token } = useUserStore();
   
   // Initialize with URL params
   const currentPage = parseInt(searchParams.get('page') || '1');
@@ -122,7 +125,7 @@ function MediaFeedContent() {
     if (parseInt(urlPage) === currentPage) {
       fetchPosts(currentPage);
     }
-  }, [currentPage, filters]); // Keep original dependencies
+  }, [currentPage, filters, token]); // Keep original dependencies
 
   // Update URL separately
   const updateUrlWithFilters = (newFilters: Filters, page: number) => {
@@ -178,6 +181,7 @@ function MediaFeedContent() {
   };
 
   const fetchPosts = async (page: number, currentFilters = filters) => {
+    if (!token) return;
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
@@ -217,6 +221,7 @@ function MediaFeedContent() {
         {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
         }
       );
@@ -251,31 +256,26 @@ function MediaFeedContent() {
 
   const toggleFlag = async (id: string) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/toggle-flag/${id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to toggle flag");
-      
-      const { flagged } = await response.json();
-      
+      // Let the FeedList component handle the API call
+      // This function will only update the UI after successful toggle
       setApiData(prev => ({
         ...prev,
         feedItems: prev.feedItems.map((item) =>
-          item.id.toString() === id ? { ...item, flagged } : item
+          item.id.toString() === id ? { ...item, flagged: !item.flagged } : item
         )
       }));
 
       // Refetch to update summary counts
-      fetchPosts(pagination.currentPage);
+      await fetchPosts(pagination.currentPage);
     } catch (error) {
-      console.error('Error toggling flag:', error);
+      console.error('Error updating flag state:', error);
+      // Revert the optimistic update if there's an error
+      setApiData(prev => ({
+        ...prev,
+        feedItems: prev.feedItems.map((item) =>
+          item.id.toString() === id ? { ...item, flagged: !item.flagged } : item
+        )
+      }));
     }
   };
 
@@ -297,7 +297,7 @@ function MediaFeedContent() {
           items={apiData.feedItems}
           loading={loading}
           error={error}
-          toggleFlag={(id: number) => toggleFlag(id.toString())}
+          toggleFlag={toggleFlag}
           pagination={pagination}
           onPageChange={handlePageChange}
         />

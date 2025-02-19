@@ -25,6 +25,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { type FeedItem } from "@/utils/mockFeedItems";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
+import { useUserStore } from "@/state/user.store";
 
 // Update the platformIcons definition to use proper type safety
 type PlatformIconType = {
@@ -56,7 +59,7 @@ interface FeedListProps {
   items: FeedItem[];
   loading: boolean;
   error: string | null;
-  toggleFlag: (id: number) => void;
+  toggleFlag: (id: string) => void;
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -78,6 +81,7 @@ export default function FeedList({
   onPageChange 
 }: FeedListProps) {
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null);
+  const {token, user} = useUserStore();
 
   // Apply filters only (no pagination)
   const filteredItems = items.filter(
@@ -161,9 +165,45 @@ export default function FeedList({
     }
   };
 
+  const togglePostFlag = async (id: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/toggle-flag/${id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+    
+      // This will trigger the optimistic update and refetch
+      toggleFlag(id.toString());
+
+    } catch (error) {
+      console.error('Error toggling flag:', error);
+      toast({
+        title: "Error",
+        description: "Failed to toggle flag. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Show loading state
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="p-4 space-y-3">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   // Show error state
@@ -171,10 +211,13 @@ export default function FeedList({
     return <div className="text-center py-8 text-red-500">Error: {error}</div>;
   }
 
+  console.log("selectedItem", selectedItem);
+
   return (
     <div>
       <AnimatePresence>
         {filteredItems.map((item) => {
+          console.log("item", item);
           const PlatformIcon = platformIcons[item.platform] || MessageCircle;
           const engagement = item.engagement || {
             likes: 0,
@@ -315,12 +358,15 @@ export default function FeedList({
                         </DialogContent>
                       </Dialog>
                       <Button
-                        variant={item.flagged ? "destructive" : "outline"}
+                        variant={item.flagged && item.flaggedBy?.includes(user?._id || "") ? "destructive" : "outline"}
                         size="sm"
-                        onClick={() => toggleFlag(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click event
+                          togglePostFlag(item.id);
+                        }}
                       >
                         <Flag className="mr-1 h-4 w-4" />
-                        {item.flagged ? "Flagged" : "Flag"}
+                        {item.flagged && item.flaggedBy?.includes(user?._id || "") ? "Flagged" : "Flag"}
                       </Button>
                     </div>
                   </div>

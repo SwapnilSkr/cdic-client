@@ -3,7 +3,7 @@
 import { Bell, Search, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "@/components/mode-toggle";
-import type React from "react"; // Added import for React
+import type React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -27,46 +27,52 @@ export default function Header({ children }: { children?: React.ReactNode }) {
   };
 
   return (
-    <header className="bg-background border-b py-4 px-6 flex items-center justify-between">
-      <div className="flex items-center">
-        {children}
-        <div className="h-[80px] w-auto mr-6">
+    <header className="bg-background border-b py-4 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Left Section - Search */}
+        <div className="w-full md:w-1/3">
+          <div className="relative flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search media..."
+                className="pl-10 pr-4 py-2 rounded-md w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+              />
+            </div>
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={handleSearch}
+            >
+              Search
+            </Button>
+          </div>
+        </div>
+
+        {/* Center Section - Logo */}
+        <div className="flex-shrink-0 h-[80px] w-auto order-first md:order-none">
           <Image
             src={Logo}
-            alt="Media Monitor Logo"
+            alt="Verideck Logo"
             className="h-full w-auto"
             priority
           />
         </div>
-        <div className="relative hidden sm:flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search media..."
-              className="pl-10 pr-4 py-2 rounded-md"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
-          </div>
-          <Button 
-            variant="default" 
-            size="sm"
-            onClick={handleSearch}
-          >
-            Search
-          </Button>
+
+        {/* Right Section - Icons */}
+        <div className="flex items-center justify-end space-x-4 w-full md:w-1/3">
+          <button className="text-foreground hover:text-primary">
+            <Bell size={20} />
+          </button>
+          <button className="text-foreground hover:text-primary">
+            <User size={20} />
+          </button>
+          <ModeToggle />
         </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        <button className="text-foreground hover:text-primary">
-          <Bell size={20} />
-        </button>
-        <button className="text-foreground hover:text-primary">
-          <User size={20} />
-        </button>
-        <ModeToggle />
       </div>
     </header>
   );

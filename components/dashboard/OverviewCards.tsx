@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUserStore } from "@/state/user.store";
 
 interface PostStats {
   totalPosts: number;
@@ -11,11 +12,17 @@ export default function OverviewCards() {
     totalPosts: 0,
     flaggedPosts: 0,
   });
+  const { token } = useUserStore();
 
   useEffect(() => {
+    if (!token) return;
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/statistics`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/statistics`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const data = await response.json();
         setStats(data.data);
       } catch (error) {
@@ -24,17 +31,19 @@ export default function OverviewCards() {
     };
 
     fetchStats();
-  }, []);
+  }, [token]);
+
+  console.log(stats);
 
   const overviewData = [
     { 
       title: "Total Posts Monitored", 
-      value: stats.totalPosts.toLocaleString(), 
+      value: stats?.totalPosts?.toLocaleString() || "0", 
       color: "text-primary" 
     },
     { 
       title: "Flagged Content", 
-      value: stats.flaggedPosts.toLocaleString(), 
+      value: stats?.flaggedPosts?.toLocaleString() || "0", 
       color: "text-destructive" 
     },
     { 

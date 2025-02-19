@@ -7,6 +7,7 @@ export type FeedItem = {
   engagement: { likes: number; views: number; comments: number };
   sentiment: "positive" | "neutral" | "negative";
   flagged: boolean;
+  flaggedBy?: string[];
 };
 
 export const mockFeedItems: FeedItem[] = [
@@ -19,6 +20,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 1500, views: 5000, comments: 250 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 2,
@@ -29,6 +31,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 3000, views: 10000, comments: 500 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 3,
@@ -39,6 +42,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 10000, views: 50000, comments: 1500 },
     sentiment: "neutral",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 4,
@@ -49,6 +53,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 5000, views: 20000, comments: 3000 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 5,
@@ -60,6 +65,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 800, views: 3000, comments: 120 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 6,
@@ -70,6 +76,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 2500, views: 8000, comments: 300 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 7,
@@ -81,6 +88,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 15000, views: 75000, comments: 2000 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 8,
@@ -91,6 +99,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 3500, views: 15000, comments: 1500 },
     sentiment: "neutral",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 9,
@@ -101,6 +110,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 200, views: 1000, comments: 100 },
     sentiment: "negative",
     flagged: true,
+    flaggedBy: [],
   },
   {
     id: 10,
@@ -112,6 +122,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 5000, views: 15000, comments: 800 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 11,
@@ -122,6 +133,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 8000, views: 40000, comments: 1000 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 12,
@@ -133,6 +145,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 6000, views: 25000, comments: 2500 },
     sentiment: "neutral",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 13,
@@ -144,6 +157,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 1200, views: 4000, comments: 150 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 14,
@@ -155,6 +169,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 7000, views: 20000, comments: 600 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 15,
@@ -165,6 +180,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 12000, views: 60000, comments: 1800 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 16,
@@ -175,6 +191,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 4000, views: 16000, comments: 3500 },
     sentiment: "negative",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 17,
@@ -185,6 +202,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 500, views: 2000, comments: 80 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 18,
@@ -196,6 +214,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 9000, views: 27000, comments: 700 },
     sentiment: "positive",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 19,
@@ -206,6 +225,7 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 20000, views: 100000, comments: 3000 },
     sentiment: "neutral",
     flagged: false,
+    flaggedBy: [],
   },
   {
     id: 20,
@@ -216,5 +236,6 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 1500, views: 6000, comments: 2000 },
     sentiment: "neutral",
     flagged: true,
+    flaggedBy: [],
   },
 ];
