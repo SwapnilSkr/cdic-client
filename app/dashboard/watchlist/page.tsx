@@ -17,9 +17,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { mockHandles } from "@/utils/mockHandles"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { Search } from "lucide-react"
+import { Search, Flag } from "lucide-react"
 
 const ITEMS_PER_PAGE = 10
 
@@ -42,8 +41,9 @@ export default function HandlesPage() {
   //const [frequencyFilter, setFrequencyFilter] = useState<string | null>(null)
   const [platformStatistics, setPlatformStatistics] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [flaggedFilter, setFlaggedFilter] = useState<string>("all")
 
-  const fetchAuthors = async (page: number, searchTerm: string, platformFilter: string | null) => {
+  const fetchAuthors = async (page: number, searchTerm: string, platformFilter: string | null, flaggedFilter: string) => {
     setLoading(true)
     try {
       const queryParams = new URLSearchParams({
@@ -57,6 +57,10 @@ export default function HandlesPage() {
       
       if (platformFilter) {
         queryParams.append('platform', platformFilter)
+      }
+
+      if (flaggedFilter && flaggedFilter !== 'all') {
+        queryParams.append('flagged', flaggedFilter)
       }
 
       // Update URL with query params without page reload
@@ -84,18 +88,47 @@ export default function HandlesPage() {
     const pageParam = parseInt(params.get('page') || '1')
     const searchParam = params.get('search') || ''
     const platformParam = params.get('platform') || null
+    const flaggedParam = params.get('flagged') || 'all'
 
     setCurrentPage(pageParam)
     setSearchTerm(searchParam)
     setSearchQuery(searchParam)
     setPlatformFilter(platformParam)
+    setFlaggedFilter(flaggedParam)
 
-    fetchAuthors(pageParam, searchParam, platformParam)
+    fetchAuthors(pageParam, searchParam, platformParam, flaggedParam)
   }, []) // Initial load
+
+  // Add this new effect to handle URL updates and state preservation
+  useEffect(() => {
+    // Update URL whenever filters change
+    const queryParams = new URLSearchParams()
+    
+    if (currentPage > 1) {
+      queryParams.set('page', currentPage.toString())
+    }
+    
+    if (searchQuery) {
+      queryParams.set('search', searchQuery)
+    }
+    
+    if (platformFilter) {
+      queryParams.set('platform', platformFilter)
+    }
+    
+    if (flaggedFilter && flaggedFilter !== 'all') {
+      queryParams.set('flagged', flaggedFilter)
+    }
+
+    const queryString = queryParams.toString()
+    const newUrl = `${window.location.pathname}${queryString ? `?${queryString}` : ''}`
+    window.history.replaceState({}, '', newUrl)
+    
+  }, [currentPage, searchQuery, platformFilter, flaggedFilter])
 
   // Add a new useEffect to handle pagination and filter changes
   useEffect(() => {
-    fetchAuthors(currentPage, searchTerm, platformFilter)
+    fetchAuthors(currentPage, searchTerm, platformFilter, flaggedFilter)
   }, [currentPage]) // Trigger fetch when page changes
 
   const totalPages = Math.ceil(totalAuthors / ITEMS_PER_PAGE)
@@ -127,13 +160,13 @@ export default function HandlesPage() {
   const handleSearch = () => {
     setCurrentPage(1)
     setSearchQuery(searchTerm)
-    fetchAuthors(1, searchTerm, platformFilter)
+    fetchAuthors(1, searchTerm, platformFilter, flaggedFilter)
   }
 
   // Update handlePageChange to include all filters
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    fetchAuthors(page, searchTerm, platformFilter)
+    fetchAuthors(page, searchTerm, platformFilter, flaggedFilter)
   }
 
   // Update handlePlatformChange to immediately trigger search and update URL
@@ -141,7 +174,14 @@ export default function HandlesPage() {
     const newPlatformFilter = value === "all" ? null : value
     setPlatformFilter(newPlatformFilter)
     setCurrentPage(1)
-    fetchAuthors(1, searchQuery, newPlatformFilter) // Use searchQuery instead of searchTerm
+    fetchAuthors(1, searchQuery, newPlatformFilter, flaggedFilter) // Use searchQuery instead of searchTerm
+  }
+
+  // Update handleFlaggedChange to immediately trigger search
+  const handleFlaggedChange = (value: string) => {
+    setFlaggedFilter(value)
+    setCurrentPage(1)
+    fetchAuthors(1, searchQuery, platformFilter, value)
   }
 
   const renderPaginationButtons = () => {
@@ -197,12 +237,12 @@ export default function HandlesPage() {
       transition={{ duration: 0.5 }}
       className="container mx-auto px-4 py-8"
     >
-      <h1 className="text-3xl font-bold mb-6">Handles</h1>
+      <h1 className="text-3xl font-bold mb-6">Watchlist</h1>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
         <div className="flex w-full md:w-auto space-x-2">
           <Input
-            placeholder="Search handles..."
+            placeholder="Search watchlist..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}
@@ -225,18 +265,21 @@ export default function HandlesPage() {
               <SelectItem value="Youtube">YouTube</SelectItem>
             </SelectContent>
           </Select>
-          {/*<Select onValueChange={(value) => setFrequencyFilter(value === "all" ? null : value)}>
+          <Select onValueChange={handleFlaggedChange} value={flaggedFilter}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Frequency" />
+              <SelectValue placeholder="Flag Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Frequencies</SelectItem>
-              <SelectItem value="Daily">Daily</SelectItem>
-              <SelectItem value="Weekly">Weekly</SelectItem>
-              <SelectItem value="Bi-Weekly">Bi-Weekly</SelectItem>
-              <SelectItem value="Monthly">Monthly</SelectItem>
+              <SelectItem value="all">All Authors</SelectItem>
+              <SelectItem value="true">
+                <div className="flex items-center">
+                  <Flag className="h-4 w-4 mr-2 text-destructive" />
+                  Flagged
+                </div>
+              </SelectItem>
+              <SelectItem value="false">Not Flagged</SelectItem>
             </SelectContent>
-          </Select>*/}
+          </Select>
         </div>
       </div>
 
@@ -273,6 +316,7 @@ export default function HandlesPage() {
                 <TableHead>Platform</TableHead>
                 <TableHead>Followers</TableHead>
                 <TableHead>Posts</TableHead>
+                <TableHead aria-label="Flag Status"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -282,6 +326,13 @@ export default function HandlesPage() {
                   <TableCell>{handle.platform}</TableCell>
                   <TableCell>{handle.followers_count?.toLocaleString() ?? "N/A"}</TableCell>
                   <TableCell>{handle.posts_count?.toLocaleString() ?? "N/A"}</TableCell>
+                  <TableCell>
+                    {handle.flagged && (
+                      <Flag 
+                        className="h-4 w-4 text-destructive cursor-help" 
+                      />
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

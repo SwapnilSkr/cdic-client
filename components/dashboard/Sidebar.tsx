@@ -8,9 +8,10 @@ import {
   Flag,
   BarChart2,
   Users,
-  MessageSquare,
+  MessageSquare,  
   AtSign,
   LogOut,
+  Eye,
 } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
 
@@ -21,7 +22,7 @@ const navItems = [
   { name: "Flagged Content", icon: Flag, href: "/dashboard/flagged" },
   { name: "Reporting", icon: BarChart2, href: "/dashboard/reporting" },
   // { name: "Ask AI", icon: MessageSquare, href: "/dashboard/ai-chat" },
-  { name: "Handles", icon: AtSign, href: "/dashboard/handles" },
+  { name: "Watchlist", icon: Eye, href: "/dashboard/watchlist" },
   { name: "User Management", icon: Users, href: "/dashboard/user" },
 ];
 
