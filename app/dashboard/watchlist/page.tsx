@@ -263,6 +263,7 @@ export default function HandlesPage() {
               <SelectItem value="Twitter">Twitter</SelectItem>
               <SelectItem value="Instagram">Instagram</SelectItem>
               <SelectItem value="Youtube">YouTube</SelectItem>
+              <SelectItem value="Google News">Google News</SelectItem>
             </SelectContent>
           </Select>
           <Select onValueChange={handleFlaggedChange} value={flaggedFilter}>

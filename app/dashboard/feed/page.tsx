@@ -12,6 +12,7 @@ import { Twitter, Instagram, Youtube } from "lucide-react";
 import { type FeedItem } from "@/utils/mockFeedItems";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUserStore } from "@/state/user.store";
+import { FaGoogle } from "react-icons/fa";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -35,7 +36,6 @@ interface Filters {
   platforms: string[];
   dateRange: { start: Date | null; end: Date | null };
   language: string;
-  sentiment: string;
   flagStatus: string;
   sortBy: string;
   keyword?: string;
@@ -70,7 +70,6 @@ function MediaFeedContent() {
       end: searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : null,
     },
     language: searchParams.get('language') || "",
-    sentiment: searchParams.get('sentiment') || "",
     flagStatus: searchParams.get('flagStatus') || "",
     sortBy: searchParams.get('sortBy') || "recent",
     keyword: searchParams.get('keyword') || "",
@@ -81,6 +80,7 @@ function MediaFeedContent() {
       { name: "Twitter", icon: Twitter },
       { name: "Instagram", icon: Instagram },
       { name: "Youtube", icon: Youtube },
+      { name: "Google News", icon: FaGoogle },
     ],
     languages: [
       { value: "en", label: "English" },

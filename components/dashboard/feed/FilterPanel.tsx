@@ -6,9 +6,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Instagram,
-  Youtube,
-  Twitter,
   ChevronDown,
   ChevronUp,
   Facebook,
@@ -16,7 +13,6 @@ import {
 import { FaReddit } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -51,7 +47,6 @@ interface Filters {
   platforms: string[];
   dateRange: { start: Date | null; end: Date | null };
   language: string;
-  sentiment: string;
   flagStatus: string;
   sortBy: string;
 }
@@ -214,29 +209,6 @@ export default function FilterPanel({ filters, setFilters, apiData }: FilterPane
                     ))}
                   </SelectContent>
                 </Select>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="sentiment">
-              <AccordionTrigger>Sentiment</AccordionTrigger>
-              <AccordionContent>
-                <RadioGroup
-                  onValueChange={(value) =>
-                    setFilters({ ...filters, sentiment: value })
-                  }
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="positive" id="positive" />
-                    <Label htmlFor="positive">Positive</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="neutral" id="neutral" />
-                    <Label htmlFor="neutral">Neutral</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="negative" id="negative" />
-                    <Label htmlFor="negative">Negative</Label>
-                  </div>
-                </RadioGroup>
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="flagStatus">
