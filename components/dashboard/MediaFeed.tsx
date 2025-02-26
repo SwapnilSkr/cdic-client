@@ -116,9 +116,9 @@ export default function MediaFeed() {
                 <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                   <div className="flex justify-between items-center">
                     <span>{item.platform} • {item.topic}</span>
-                    <span>
+                    {item.engagement && item.platform !== "News" && <span>
                       {item.engagement.likes} likes • {item.engagement.comments} comments
-                    </span>
+                    </span>}
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />

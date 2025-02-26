@@ -245,7 +245,7 @@ export default function FilterPanel({ filters, setFilters, apiData }: FilterPane
                     <SelectItem value="engagement">
                       Highest Engagement
                     </SelectItem>
-                    <SelectItem value="impact">Highest Impact</SelectItem>
+                    <SelectItem value="oldest">Oldest</SelectItem>
                   </SelectContent>
                 </Select>
               </AccordionContent>

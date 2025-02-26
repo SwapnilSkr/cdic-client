@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ThumbsUp,
@@ -28,6 +28,7 @@ import { type FeedItem } from "@/utils/mockFeedItems";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { useUserStore } from "@/state/user.store";
+import Image from "next/image";
 
 // Update the platformIcons definition to use proper type safety
 type PlatformIconType = {
@@ -82,9 +83,15 @@ export default function FeedList({
 }: FeedListProps) {
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null);
   const {token, user} = useUserStore();
+  const [localItems, setLocalItems] = useState<FeedItem[]>(items);
+
+  // Update local items when items prop changes
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
 
   // Apply filters only (no pagination)
-  const filteredItems = items.filter(
+  const filteredItems = localItems.filter(
     (item) =>
       (!filters.platforms.length ||
         filters.platforms.includes(item.platform)) &&
@@ -191,6 +198,38 @@ export default function FeedList({
     }
   };
 
+  const dismissPost = async (id: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/dismiss/${id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+    
+      // Remove the post from local state immediately
+      setLocalItems(prevItems => prevItems.filter(item => item.id !== id));
+      
+      toast({
+        title: "Success",
+        description: "Post dismissed successfully.",
+        variant: "default",
+      });
+
+    } catch (error) {
+      console.error('Error updating post dismiss status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update dismiss status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Show loading state
   if (loading) {
     return (
@@ -211,19 +250,17 @@ export default function FeedList({
     return <div className="text-center py-8 text-red-500">Error: {error}</div>;
   }
 
-  console.log("selectedItem", selectedItem);
-
   return (
     <div>
       <AnimatePresence>
         {filteredItems.map((item) => {
-          console.log("item", item);
           const PlatformIcon = platformIcons[item.platform] || MessageCircle;
           const engagement = item.engagement || {
             likes: 0,
             views: 0,
             comments: 0,
           };
+          const postUrl = item.post_url;
 
           return (
             <motion.div
@@ -265,16 +302,20 @@ export default function FeedList({
                   <p className="mb-2">{item.content}</p>
                   <div className="flex justify-between items-center">
                     <div className="flex space-x-4">
-                      <span className="flex items-center text-sm text-muted-foreground">
-                        <ThumbsUp className="mr-1 h-4 w-4" /> {engagement.likes}
-                      </span>
-                      <span className="flex items-center text-sm text-muted-foreground">
-                        <Eye className="mr-1 h-4 w-4" /> {engagement.views}
-                      </span>
-                      <span className="flex items-center text-sm text-muted-foreground">
-                        <MessageSquare className="mr-1 h-4 w-4" />{" "}
-                        {engagement.comments}
-                      </span>
+                      {item.platform !== "News" && (
+                        <>
+                          <span className="flex items-center text-sm text-muted-foreground">
+                            <ThumbsUp className="mr-1 h-4 w-4" /> {engagement.likes}
+                          </span>
+                          <span className="flex items-center text-sm text-muted-foreground">
+                            <Eye className="mr-1 h-4 w-4" /> {engagement.views}
+                          </span>
+                          <span className="flex items-center text-sm text-muted-foreground">
+                            <MessageSquare className="mr-1 h-4 w-4" />{" "}
+                            {engagement.comments}
+                          </span>
+                        </>
+                      )}
                     </div>
                     <div className="flex space-x-2">
                       <Dialog>
@@ -316,24 +357,66 @@ export default function FeedList({
                                 </div>
                               </div>
                               <p className="mb-4">{selectedItem.content}</p>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <p className="font-semibold">Engagement</p>
-                                  <ul className="list-disc list-inside">
-                                    <li>
-                                      Likes:{" "}
-                                      {selectedItem.engagement?.likes || 0}
-                                    </li>
-                                    <li>
-                                      Views:{" "}
-                                      {selectedItem.engagement?.views || 0}
-                                    </li>
-                                    <li>
-                                      Comments:{" "}
-                                      {selectedItem.engagement?.comments || 0}
-                                    </li>
-                                  </ul>
+                              
+                              {/* Add image display */}
+                              {(selectedItem.image_url || (selectedItem.platform === "Instagram" && selectedItem.post_url)) && (
+                                <div className="mb-4">
+                                  {selectedItem.platform === "Instagram" && selectedItem.post_url ? (
+                                    <div className="relative w-full" style={{ height: "300px", width: "500px" }}>
+                                      <Image 
+                                        src={`${selectedItem.post_url}media/?size=m`}
+                                        alt="Instagram post"
+                                        fill
+                                        style={{ objectFit: "contain" }}
+                                        className="w-full rounded-md"
+                                      />
+                                    </div>
+                                  ) : selectedItem.platform !== "Instagram" && selectedItem.image_url ? (
+                                    <Image 
+                                      src={selectedItem.image_url}
+                                      alt="Post content" 
+                                      width={500}
+                                      height={300}
+                                      className="w-full rounded-md"
+                                    />
+                                  ) : null}
                                 </div>
+                              )}
+                              
+                              {/* Add post URL link */}
+                              {postUrl && (
+                                <div className="mb-4">
+                                  <a 
+                                    href={postUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                  >
+                                    View Original Post
+                                  </a>
+                                </div>
+                              )}
+                              
+                              <div className="grid grid-cols-2 gap-4">
+                                {selectedItem.platform !== "News" && (
+                                  <div>
+                                    <p className="font-semibold">Engagement</p>
+                                    <ul className="list-disc list-inside">
+                                      <li>
+                                        Likes:{" "}
+                                        {selectedItem.engagement?.likes || 0}
+                                      </li>
+                                      <li>
+                                        Views:{" "}
+                                        {selectedItem.engagement?.views || 0}
+                                      </li>
+                                      <li>
+                                        Comments:{" "}
+                                        {selectedItem.engagement?.comments || 0}
+                                      </li>
+                                    </ul>
+                                  </div>
+                                )}
                                 <div>
                                   <p className="font-semibold">Metadata</p>
                                   <ul className="list-disc list-inside">
@@ -367,6 +450,17 @@ export default function FeedList({
                       >
                         <Flag className="mr-1 h-4 w-4" />
                         {item.flagged && item.flaggedBy?.includes(user?._id || "") ? "Flagged" : "Flag"}
+                      </Button>
+                      <Button
+                        variant={item.dismissed ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click event
+                          dismissPost(item.id);
+                        }}
+                      >
+                        <Eye className="mr-1 h-4 w-4" />
+                        Dismiss
                       </Button>
                     </div>
                   </div>

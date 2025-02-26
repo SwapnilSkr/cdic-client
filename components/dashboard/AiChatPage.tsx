@@ -149,7 +149,7 @@ export default function AiChatPage() {
 
   if (isInitialLoading) {
     return (
-      <Card className="h-[670px]">
+      <Card className="h-[400px]">
         <CardHeader className="border-b p-3 bg-primary">
           <Skeleton className="h-6 w-32" />
         </CardHeader>
@@ -176,13 +176,13 @@ export default function AiChatPage() {
   }
 
   return (
-    <Card className="h-[670px]">
+    <Card className="h-[400px]">
       <CardHeader className="border-b p-3 bg-primary">
         <CardTitle className="text-xl font-bold text-primary-foreground">
           AI Assistant
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 flex flex-col h-[calc(670px-3.75rem)]">
+      <CardContent className="p-0 flex flex-col h-[calc(100%-3.75rem)]">
         <div className="flex-grow overflow-y-auto p-4 messages-container">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">

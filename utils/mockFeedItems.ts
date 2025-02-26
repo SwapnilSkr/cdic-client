@@ -1,13 +1,16 @@
 export type FeedItem = {
   id: number;
-  platform: "Facebook" | "Instagram" | "YouTube" | "Reddit";
+  platform: "Facebook" | "Instagram" | "Youtube" | "Reddit" | "News";
   author: { name: string; image: string };
   content: string;
   timestamp: string;
   engagement: { likes: number; views: number; comments: number };
   sentiment: "positive" | "neutral" | "negative";
+  image_url?: string;
+  post_url?: string;
   flagged: boolean;
   flaggedBy?: string[];
+  dismissed: boolean;
 };
 
 export const mockFeedItems: FeedItem[] = [
@@ -21,6 +24,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 2,
@@ -32,10 +36,11 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 3,
-    platform: "YouTube",
+    platform: "Youtube",
     author: { name: "Tech Reviews", image: "/placeholder-user.jpg" },
     content: "New video: Top 10 Smartphones of 2025 - You won't believe #5!",
     timestamp: "1 day ago",
@@ -43,6 +48,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "neutral",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 4,
@@ -54,6 +60,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 5,
@@ -66,6 +73,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 6,
@@ -77,10 +85,11 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 7,
-    platform: "YouTube",
+    platform: "Youtube",
     author: { name: "Travel Vlogger", image: "/placeholder-user.jpg" },
     content:
       "Exploring hidden gems in Bali - You won't find these in guidebooks!",
@@ -89,6 +98,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 8,
@@ -100,6 +110,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "neutral",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 9,
@@ -111,6 +122,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "negative",
     flagged: true,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 10,
@@ -123,10 +135,11 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 11,
-    platform: "YouTube",
+    platform: "Youtube",
     author: { name: "DIY Crafts", image: "/placeholder-user.jpg" },
     content: "5 Easy Home Decor Ideas Using Recycled Materials",
     timestamp: "3 days ago",
@@ -134,6 +147,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 12,
@@ -146,6 +160,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "neutral",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 13,
@@ -157,7 +172,8 @@ export const mockFeedItems: FeedItem[] = [
     engagement: { likes: 1200, views: 4000, comments: 150 },
     sentiment: "positive",
     flagged: false,
-    flaggedBy: [],
+    flaggedBy: [], 
+    dismissed: false,
   },
   {
     id: 14,
@@ -170,10 +186,11 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 15,
-    platform: "YouTube",
+    platform: "Youtube",
     author: { name: "Cooking Channel", image: "/placeholder-user.jpg" },
     content: "How to Make the Perfect Pizza Dough - Step by Step Guide",
     timestamp: "4 days ago",
@@ -181,6 +198,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 16,
@@ -192,6 +210,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "negative",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 17,
@@ -203,6 +222,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 18,
@@ -215,10 +235,11 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "positive",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 19,
-    platform: "YouTube",
+    platform: "Youtube",
     author: { name: "Science Explained", image: "/placeholder-user.jpg" },
     content: "The Mystery of Dark Matter: What We Know So Far",
     timestamp: "1 week ago",
@@ -226,6 +247,7 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "neutral",
     flagged: false,
     flaggedBy: [],
+    dismissed: false,
   },
   {
     id: 20,
@@ -237,5 +259,6 @@ export const mockFeedItems: FeedItem[] = [
     sentiment: "neutral",
     flagged: true,
     flaggedBy: [],
-  },
+    dismissed: false,
+    },
 ];

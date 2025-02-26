@@ -103,7 +103,7 @@ export function TopicDetailPanel({ selectedTopic, topics, onUpdateTopic }: Topic
             </div>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="text-lg font-semibold mb-2">Alert Threshold</h3>
             <div className="flex items-center space-x-2">
               <Input
@@ -137,7 +137,7 @@ export function TopicDetailPanel({ selectedTopic, topics, onUpdateTopic }: Topic
             </ResponsiveContainer>
           </div>
 
-          <Button className="w-full">Save Changes</Button>
+          <Button className="w-full">Save Changes</Button> */}
         </CardContent>
       </Card>
     </motion.div>

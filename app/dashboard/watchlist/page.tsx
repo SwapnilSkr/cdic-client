@@ -19,6 +19,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Search, Flag } from "lucide-react"
+import { useUserStore } from "@/state/user.store"
+import { toast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 10
 
@@ -42,6 +44,7 @@ export default function HandlesPage() {
   const [platformStatistics, setPlatformStatistics] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [flaggedFilter, setFlaggedFilter] = useState<string>("all")
+  const {token} = useUserStore()
 
   const fetchAuthors = async (page: number, searchTerm: string, platformFilter: string | null, flaggedFilter: string) => {
     setLoading(true)
@@ -184,6 +187,47 @@ export default function HandlesPage() {
     fetchAuthors(1, searchQuery, platformFilter, value)
   }
 
+  // Update the handleWatchlistToggle function to use toast
+  const handleWatchlistToggle = async (authorId: string, currentStatus: boolean) => {
+    try {
+      const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/authors/${authorId}/flag`
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${currentStatus ? 'remove from' : 'add to'} watchlist`)
+      }
+
+      // Update the local state to reflect the change
+      setAuthors(authors.map(author => 
+        author.author_id === authorId 
+          ? {...author, flagged: !currentStatus} 
+          : author
+      ))
+
+      // Show success toast instead of alert
+      toast({
+        title: "Success",
+        description: `Author ${currentStatus ? 'removed from' : 'added to'} watchlist successfully`,
+      })
+    } catch (error) {
+      console.error('Error toggling watchlist status:', error)
+      
+      // Show error toast instead of alert
+      toast({
+        title: "Error",
+        description: `Failed to ${currentStatus ? 'remove from' : 'add to'} watchlist`,
+        variant: "destructive",
+      })
+    }
+  }
+
   const renderPaginationButtons = () => {
     const buttons = [];
     const maxButtons = 5; // Define the maximum number of pagination buttons
@@ -263,7 +307,7 @@ export default function HandlesPage() {
               <SelectItem value="Twitter">Twitter</SelectItem>
               <SelectItem value="Instagram">Instagram</SelectItem>
               <SelectItem value="Youtube">YouTube</SelectItem>
-              <SelectItem value="Google News">Google News</SelectItem>
+              <SelectItem value="News">News</SelectItem>
             </SelectContent>
           </Select>
           <Select onValueChange={handleFlaggedChange} value={flaggedFilter}>
@@ -317,22 +361,33 @@ export default function HandlesPage() {
                 <TableHead>Platform</TableHead>
                 <TableHead>Followers</TableHead>
                 <TableHead>Posts</TableHead>
-                <TableHead aria-label="Flag Status"></TableHead>
+                <TableHead>Watchlisted</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {authors.map((handle) => (
                 <TableRow key={handle.author_id}>
-                  <TableCell onClick={() => window.open(handle.profile_link, '_blank')}>{handle.username}</TableCell>
+                  <TableCell>
+                    <span 
+                      onClick={() => window.open(handle.profile_link, '_blank')} 
+                      className="cursor-pointer underline"
+                    >
+                      {handle.username}
+                    </span>
+                  </TableCell>
                   <TableCell>{handle.platform}</TableCell>
                   <TableCell>{handle.followers_count?.toLocaleString() ?? "N/A"}</TableCell>
                   <TableCell>{handle.posts_count?.toLocaleString() ?? "N/A"}</TableCell>
+                  <TableCell>{handle.flagged ? "True" : "False"}</TableCell>
                   <TableCell>
-                    {handle.flagged && (
-                      <Flag 
-                        className="h-4 w-4 text-destructive cursor-help" 
-                      />
-                    )}
+                    <Button 
+                      variant={handle.flagged ? "destructive" : "outline"} 
+                      size="sm"
+                      onClick={() => handleWatchlistToggle(handle.author_id, handle.flagged)}
+                    >
+                      {handle.flagged ? "Remove from Watchlist" : "Add to Watchlist"}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

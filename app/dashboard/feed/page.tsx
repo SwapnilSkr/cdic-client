@@ -80,7 +80,7 @@ function MediaFeedContent() {
       { name: "Twitter", icon: Twitter },
       { name: "Instagram", icon: Instagram },
       { name: "Youtube", icon: Youtube },
-      { name: "Google News", icon: FaGoogle },
+      { name: "News", icon: FaGoogle },
     ],
     languages: [
       { value: "en", label: "English" },
