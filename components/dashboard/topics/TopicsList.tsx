@@ -301,11 +301,6 @@ export function TopicsList({
                   <div className="mt-2 text-xs text-muted-foreground">
                     Created: {new Date(topic.createdAt).toLocaleDateString()}
                   </div>
-                  <div className="mt-2 flex justify-between text-xs">
-                    <span>Positive: {topic.sentiment.positive}%</span>
-                    <span>Neutral: {topic.sentiment.neutral}%</span>
-                    <span>Negative: {topic.sentiment.negative}%</span>
-                  </div>
                 </CardContent>
               </Card>
             </motion.div>
