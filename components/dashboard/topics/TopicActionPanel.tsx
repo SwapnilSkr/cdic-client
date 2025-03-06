@@ -28,9 +28,46 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
     description: "",
     tags: "",
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    description: "",
+    tags: "",
+  });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      name: "",
+      description: "",
+      tags: "",
+    };
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Topic name is required";
+      isValid = false;
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+      isValid = false;
+    }
+
+    if (!formData.tags.trim()) {
+      newErrors.tags = "At least one tag is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsSubmitting(true);
 
     const newTopic: Omit<Topic, "_id" | "createdAt"> = {
@@ -116,7 +153,9 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     placeholder="Enter topic name"
+                    className={errors.name ? "border-red-500" : ""}
                   />
+                  {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
                 </div>
                 <div>
                   <Label htmlFor="topicDescription">Description</Label>
@@ -127,7 +166,9 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
                       setFormData({ ...formData, description: e.target.value })
                     }
                     placeholder="Enter topic description"
+                    className={errors.description ? "border-red-500" : ""}
                   />
+                  {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
                 </div>
                 <div>
                   <Label htmlFor="topicTags">Tags (comma-separated)</Label>
@@ -138,7 +179,9 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
                       setFormData({ ...formData, tags: e.target.value })
                     }
                     placeholder="Enter tags"
+                    className={errors.tags ? "border-red-500" : ""}
                   />
+                  {errors.tags && <p className="text-sm text-red-500 mt-1">{errors.tags}</p>}
                 </div>
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Creating..." : "Create Topic"}
