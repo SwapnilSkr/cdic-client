@@ -235,10 +235,27 @@ export default function FeedList({
     return (
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="p-4 space-y-3">
-            <Skeleton className="h-4 w-[250px]" />
+          <div key={i} className="p-4 space-y-3 border rounded-lg">
+            <div className="flex items-center">
+              <Skeleton className="h-10 w-10 rounded-full mr-2" />
+              <Skeleton className="h-4 w-[150px]" />
+            </div>
             <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-[200px]" />
+            <Skeleton className="h-4 w-[80%]" />
+            {/* Image skeleton */}
+            <Skeleton className="h-48 w-full rounded-md" />
+            <div className="flex justify-between">
+              <div className="flex space-x-2">
+                <Skeleton className="h-4 w-[50px]" />
+                <Skeleton className="h-4 w-[50px]" />
+                <Skeleton className="h-4 w-[50px]" />
+              </div>
+              <div className="flex space-x-2">
+                <Skeleton className="h-8 w-[100px]" />
+                <Skeleton className="h-8 w-[80px]" />
+                <Skeleton className="h-8 w-[80px]" />
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -271,7 +288,7 @@ export default function FeedList({
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="mb-4">
+              <Card className="mb-4 overflow-hidden">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div className="flex items-center">
                     <PlatformIcon className="mr-2 h-5 w-5 text-muted-foreground" />
@@ -300,7 +317,33 @@ export default function FeedList({
                     </span>
                   </div>
                   <p className="mb-2">{item.content}</p>
-                  <div className="flex justify-between items-center">
+                  
+                  {/* Display image in feed list if available */}
+                  {(item.image_url || (item.platform === "Instagram" && item.post_url)) && (
+                    <div className="mb-4 overflow-hidden rounded-md">
+                      <div className="relative w-full h-48 md:h-64 bg-gray-100">
+                        {item.platform === "Instagram" && item.post_url ? (
+                          <Image 
+                            src={`${item.post_url}media/?size=m`}
+                            alt="Instagram post"
+                            fill
+                            style={{ objectFit: "contain" }}
+                            className="hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : item.platform !== "Instagram" && item.image_url ? (
+                          <Image 
+                            src={item.image_url}
+                            alt="Post content" 
+                            fill
+                            style={{ objectFit: "contain" }}
+                            className="hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div className="flex space-x-4">
                       {item.platform !== "News" && (
                         <>
@@ -317,7 +360,7 @@ export default function FeedList({
                         </>
                       )}
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button
@@ -360,9 +403,9 @@ export default function FeedList({
                               
                               {/* Add image display */}
                               {(selectedItem.image_url || (selectedItem.platform === "Instagram" && selectedItem.post_url)) && (
-                                <div className="mb-4">
+                                <div className="mb-4 overflow-hidden rounded-md">
                                   {selectedItem.platform === "Instagram" && selectedItem.post_url ? (
-                                    <div className="relative w-full" style={{ height: "300px", width: "500px" }}>
+                                    <div className="relative w-full h-64 md:h-80 bg-gray-100">
                                       <Image 
                                         src={`${selectedItem.post_url}media/?size=m`}
                                         alt="Instagram post"
@@ -372,13 +415,15 @@ export default function FeedList({
                                       />
                                     </div>
                                   ) : selectedItem.platform !== "Instagram" && selectedItem.image_url ? (
-                                    <Image 
-                                      src={selectedItem.image_url}
-                                      alt="Post content" 
-                                      width={500}
-                                      height={300}
-                                      className="w-full rounded-md"
-                                    />
+                                    <div className="relative w-full h-64 md:h-80 bg-gray-100">
+                                      <Image 
+                                        src={selectedItem.image_url}
+                                        alt="Post content" 
+                                        fill
+                                        style={{ objectFit: "contain" }}
+                                        className="w-full rounded-md"
+                                      />
+                                    </div>
                                   ) : null}
                                 </div>
                               )}
@@ -471,7 +516,7 @@ export default function FeedList({
         })}
       </AnimatePresence>
       
-      <div className="flex justify-center items-center space-x-2 mt-4">
+      <div className="flex flex-wrap justify-center items-center gap-2 mt-4">
         <Button
           variant="outline"
           size="sm"
@@ -481,7 +526,7 @@ export default function FeedList({
           Previous
         </Button>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2 justify-center">
           {renderPaginationButtons()}
         </div>
         
