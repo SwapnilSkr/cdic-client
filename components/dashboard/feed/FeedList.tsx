@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ThumbsUp,
@@ -82,13 +82,37 @@ export default function FeedList({
   onPageChange 
 }: FeedListProps) {
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null);
+  const [imagePreviewItem, setImagePreviewItem] = useState<FeedItem | null>(null);
   const {token, user} = useUserStore();
   const [localItems, setLocalItems] = useState<FeedItem[]>(items);
+  const feedContainerRef = useRef<HTMLDivElement>(null);
 
   // Update local items when items prop changes
   useEffect(() => {
     setLocalItems(items);
   }, [items]);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    if (pagination.currentPage) {
+      // Use setTimeout to ensure this happens after re-render
+      setTimeout(() => {
+        // Try to scroll the container if it exists
+        if (feedContainerRef.current) {
+          feedContainerRef.current.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+        
+        // Also scroll the window as a fallback
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }
+  }, [pagination.currentPage]);
 
   // Apply filters only (no pagination)
   const filteredItems = localItems.filter(
@@ -243,7 +267,7 @@ export default function FeedList({
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-[80%]" />
             {/* Image skeleton */}
-            <Skeleton className="h-48 w-full rounded-md" />
+            <Skeleton className="h-64 md:h-80 w-full rounded-md" />
             <div className="flex justify-between">
               <div className="flex space-x-2">
                 <Skeleton className="h-4 w-[50px]" />
@@ -268,7 +292,7 @@ export default function FeedList({
   }
 
   return (
-    <div>
+    <div ref={feedContainerRef}>
       <AnimatePresence>
         {filteredItems.map((item) => {
           const PlatformIcon = platformIcons[item.platform] || MessageCircle;
@@ -320,14 +344,17 @@ export default function FeedList({
                   
                   {/* Display image in feed list if available */}
                   {(item.image_url || (item.platform === "Instagram" && item.post_url)) && (
-                    <div className="mb-4 overflow-hidden rounded-md">
-                      <div className="relative w-full h-48 md:h-64 bg-gray-100">
+                    <div 
+                      className="mb-4 overflow-hidden rounded-md cursor-pointer" 
+                      onClick={() => setImagePreviewItem(item)}
+                    >
+                      <div className="relative w-full h-64 md:h-80 lg:h-96 bg-gray-100">
                         {item.platform === "Instagram" && item.post_url ? (
                           <Image 
                             src={`${item.post_url}media/?size=m`}
                             alt="Instagram post"
                             fill
-                            style={{ objectFit: "contain" }}
+                            style={{ objectFit: "cover" }}
                             className="hover:scale-105 transition-transform duration-300"
                           />
                         ) : item.platform !== "Instagram" && item.image_url ? (
@@ -335,10 +362,13 @@ export default function FeedList({
                             src={item.image_url}
                             alt="Post content" 
                             fill
-                            style={{ objectFit: "contain" }}
+                            style={{ objectFit: "cover" }}
                             className="hover:scale-105 transition-transform duration-300"
                           />
                         ) : null}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-opacity duration-300 flex items-center justify-center">
+                          <Eye className="text-white opacity-0 hover:opacity-100 h-10 w-10 transition-opacity duration-300" />
+                        </div>
                       </div>
                     </div>
                   )}
@@ -405,7 +435,7 @@ export default function FeedList({
                               {(selectedItem.image_url || (selectedItem.platform === "Instagram" && selectedItem.post_url)) && (
                                 <div className="mb-4 overflow-hidden rounded-md">
                                   {selectedItem.platform === "Instagram" && selectedItem.post_url ? (
-                                    <div className="relative w-full h-64 md:h-80 bg-gray-100">
+                                    <div className="relative w-full h-72 bg-gray-100">
                                       <Image 
                                         src={`${selectedItem.post_url}media/?size=m`}
                                         alt="Instagram post"
@@ -415,7 +445,7 @@ export default function FeedList({
                                       />
                                     </div>
                                   ) : selectedItem.platform !== "Instagram" && selectedItem.image_url ? (
-                                    <div className="relative w-full h-64 md:h-80 bg-gray-100">
+                                    <div className="relative w-full h-72 bg-gray-100">
                                       <Image 
                                         src={selectedItem.image_url}
                                         alt="Post content" 
@@ -539,6 +569,59 @@ export default function FeedList({
           Next
         </Button>
       </div>
+
+      {/* Image Modal */}
+      {imagePreviewItem && (
+        <Dialog open={!!imagePreviewItem} onOpenChange={(open) => !open && setImagePreviewItem(null)}>
+          <DialogContent className="sm:max-w-[800px]">
+            <DialogHeader>
+              <DialogTitle>Image Preview</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              {(imagePreviewItem.image_url || (imagePreviewItem.platform === "Instagram" && imagePreviewItem.post_url)) && (
+                <div className="overflow-hidden rounded-md">
+                  {imagePreviewItem.platform === "Instagram" && imagePreviewItem.post_url ? (
+                    <div className="relative w-full h-80 md:h-96 lg:h-[500px] bg-gray-100">
+                      <Image 
+                        src={`${imagePreviewItem.post_url}media/?size=m`}
+                        alt="Instagram post"
+                        fill
+                        style={{ objectFit: "contain" }}
+                        className="w-full rounded-md"
+                      />
+                    </div>
+                  ) : imagePreviewItem.platform !== "Instagram" && imagePreviewItem.image_url ? (
+                    <div className="relative w-full h-80 md:h-96 lg:h-[500px] bg-gray-100">
+                      <Image 
+                        src={imagePreviewItem.image_url}
+                        alt="Post content" 
+                        fill
+                        style={{ objectFit: "contain" }}
+                        className="w-full rounded-md"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              )}
+              <div className="mt-4">
+                <p className="text-sm text-muted-foreground">{imagePreviewItem.content}</p>
+                {imagePreviewItem.post_url && (
+                  <div className="mt-2">
+                    <a 
+                      href={imagePreviewItem.post_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline text-sm"
+                    >
+                      View Original Post
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
