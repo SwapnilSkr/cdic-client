@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Topic } from "@/utils/types";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { useUserStore } from "@/state/user.store";
 interface TopicsListProps {
   topics: Topic[];
   searchTerm: string;
@@ -45,6 +45,7 @@ export function TopicsList({
   pagination,
   onPageChange,
 }: TopicsListProps) {
+  const { token } = useUserStore();
   const [isLoading, setIsLoading] = useState(true);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,7 +92,7 @@ export function TopicsList({
       // Update topic
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics/${editingTopic._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(editingTopic),
       });
 
@@ -105,7 +106,7 @@ export function TopicsList({
         setShowSuccess(true);
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/upload`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify(updatedTopic),
         });
       } else {
@@ -121,6 +122,7 @@ export function TopicsList({
   const handleDelete = async (topicId: string) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics/${topicId}`, {
       method: "DELETE",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
     });
 
     if (response.ok) {

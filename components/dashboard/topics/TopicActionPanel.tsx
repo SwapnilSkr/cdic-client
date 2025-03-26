@@ -14,12 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Topic } from "@/utils/types";
-
+import { useUserStore } from "@/state/user.store";
 interface TopicActionPanelProps {
   onAddTopic: (topic: Omit<Topic, "id" | "createdAt">) => void;
 }
 
 export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
+  const { token } = useUserStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -88,7 +89,7 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
       // Create topic
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/topics`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(newTopic),
       });
 
@@ -103,7 +104,7 @@ export function TopicActionPanel({ onAddTopic }: TopicActionPanelProps) {
       // Trigger post upload in background
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/upload`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(createdTopic),
       });
 
