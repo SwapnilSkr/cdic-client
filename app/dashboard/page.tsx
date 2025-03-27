@@ -27,7 +27,7 @@ const itemVariants = {
 export default function Dashboard() {
   return (
     <motion.div
-      className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-80px)] p-6"
+      className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-80px)] overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -35,17 +35,17 @@ export default function Dashboard() {
       {/* Left Column - Overview Cards and AI Chat */}
       <motion.div
         variants={itemVariants}
-        className="flex flex-col gap-6 h-full"
+        className="w-full lg:w-1/2 flex flex-col gap-6 overflow-hidden"
       >
         <motion.div
           variants={itemVariants}
-          className="h-[25%]"
+          className="h-1/3 flex-shrink-0 overflow-hidden"
         >
           <OverviewCards />
         </motion.div>
         <motion.div
           variants={itemVariants}
-          className="h-[75%]"
+          className="h-2/3 flex-grow overflow-hidden"
         >
           <AiChatPage />
         </motion.div>
@@ -54,17 +54,17 @@ export default function Dashboard() {
       {/* Right Column - Media Feed and Verification Panel */}
       <motion.div
         variants={itemVariants}
-        className="flex flex-col gap-6 h-full"
+        className="w-full lg:w-1/2 flex flex-col gap-4 overflow-hidden"
       >
         <motion.div
           variants={itemVariants}
-          className="h-[66%]"
+          className="flex-1 overflow-hidden"
         >
           <MediaFeed />
         </motion.div>
         <motion.div
           variants={itemVariants}
-          className="h-[34%]"
+          className="flex-1 overflow-hidden"
         >
           <VerificationPanel />
         </motion.div>
@@ -74,19 +74,6 @@ export default function Dashboard() {
         html, body {
           height: 100vh;
           overflow: hidden;
-        }
-        
-        /* Remove fixed heights from component cards */
-        .card {
-          height: 100% !important;
-          display: flex;
-          flex-direction: column;
-        }
-        
-        /* Ensure content areas use remaining height */
-        .card-content {
-          flex: 1;
-          overflow: auto;
         }
       `}</style>
     </motion.div>

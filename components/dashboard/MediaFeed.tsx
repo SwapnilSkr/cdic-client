@@ -55,11 +55,11 @@ export default function MediaFeed() {
 
   if (loading) {
     return (
-      <Card className="h-full">
-        <CardHeader>
+      <Card className="h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <Skeleton className="h-8 w-[300px]" />
         </CardHeader>
-        <CardContent className="card-content">
+        <CardContent className="flex-grow">
           <ul className="space-y-4">
             {[...Array(5)].map((_, index) => (
               <li key={index} className="border-b pb-2">
@@ -78,12 +78,12 @@ export default function MediaFeed() {
 
   if (!feedItems || feedItems.length === 0) {
     return (
-      <Card className="h-full">
-        <CardHeader>
+      <Card className="h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <CardTitle>Today&apos;s Most Discussed Topics</CardTitle>
         </CardHeader>
-        <CardContent className="card-content flex items-center justify-center">
-          <div className="flex flex-col items-center justify-center text-center">
+        <CardContent className="flex-grow">
+          <div className="flex flex-col items-center justify-center h-full text-center">
             <FileX className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Discussions Yet</h3>
             <p className="text-sm text-muted-foreground max-w-sm">
@@ -96,11 +96,11 @@ export default function MediaFeed() {
   }
 
   return (
-    <Card className="h-full">
-      <CardHeader className="border-b">
+    <Card className="h-full flex flex-col">
+      <CardHeader className="border-b flex-shrink-0">
         <CardTitle>Today&apos;s Most Discussed Topics</CardTitle>
       </CardHeader>
-      <CardContent className="card-content p-0">
+      <CardContent className="p-0 flex-grow overflow-hidden">
         <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-track-transparent">
           <ul className="divide-y">
             {feedItems.map((item) => (

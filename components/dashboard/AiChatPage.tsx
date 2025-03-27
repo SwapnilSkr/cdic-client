@@ -354,7 +354,7 @@ export default function AiChatPage() {
   if (isInitialLoading) {
     return (
       <Card className="h-full flex flex-col">
-        <CardHeader className="border-b p-3 bg-primary flex-shrink-0">
+        <CardHeader className="h-16 border-b p-3 bg-primary flex-shrink-0">
           <Skeleton className="h-6 w-32" />
         </CardHeader>
         <CardContent className="flex-grow p-4 overflow-hidden">
@@ -367,7 +367,7 @@ export default function AiChatPage() {
             ))}
           </div>
         </CardContent>
-        <div className="p-3 bg-muted border-t flex-shrink-0">
+        <div className="h-20 p-3 bg-muted border-t flex-shrink-0">
           <div className="flex items-center space-x-2">
             <Skeleton className="h-9 flex-grow" />
             <Skeleton className="h-9 w-9" />
@@ -378,8 +378,8 @@ export default function AiChatPage() {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="border-b p-3 bg-primary flex-shrink-0">
+    <Card className="h-[400px] flex flex-col">
+      <CardHeader className="h-16 border-b p-3 bg-primary flex-shrink-0">
         <CardTitle className="text-xl font-bold text-primary-foreground">
           AI Assistant
         </CardTitle>
@@ -460,7 +460,7 @@ export default function AiChatPage() {
           )}
           <div ref={messagesEndRef} />
         </div>
-        <div className="p-3 bg-muted border-t flex-shrink-0">
+        <div className="h-20 p-3 bg-muted border-t flex-shrink-0">
           <div className="flex items-center space-x-2 h-full">
             <Input
               value={input}
