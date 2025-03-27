@@ -49,11 +49,11 @@ export default function VerificationPanel() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="h-full">
         <CardHeader>
           <Skeleton className="h-8 w-[200px]" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="card-content">
           <ul className="space-y-4">
             {[...Array(5)].map((_, index) => (
               <li key={index}>
@@ -69,12 +69,12 @@ export default function VerificationPanel() {
 
   if (!posts || posts.length === 0) {
     return (
-      <Card>
+      <Card className="h-full">
         <CardHeader>
           <CardTitle>Reviewed Posts</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 text-center">
+        <CardContent className="card-content flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center text-center">
             <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Reviewed Posts</h3>
             <p className="text-sm text-muted-foreground max-w-sm">
@@ -87,12 +87,12 @@ export default function VerificationPanel() {
   }
 
   return (
-    <Card className="h-[250px]">
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Reviewed Posts</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-[150px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-track-transparent">
+      <CardContent className="card-content">
+        <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400 scrollbar-track-transparent">
         <ul className="space-y-4">
           {posts.map((post) => (
             <li 

@@ -27,35 +27,68 @@ const itemVariants = {
 export default function Dashboard() {
   return (
     <motion.div
-      className="flex flex-col lg:flex-row gap-6 max-h-[calc(100vh-80px)] overflow-hidden"
+      className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-80px)] p-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {/* Left Column - Overview Cards and AI Chat */}
-      <motion.div 
+      <motion.div
         variants={itemVariants}
-        className="w-full lg:w-1/2 flex flex-col gap-6 overflow-hidden"
+        className="flex flex-col gap-6 h-full"
       >
-        <motion.div variants={itemVariants} className="flex-shrink-0">
+        <motion.div
+          variants={itemVariants}
+          className="h-[25%]"
+        >
           <OverviewCards />
         </motion.div>
-        <motion.div variants={itemVariants} className="flex-grow overflow-hidden">
+        <motion.div
+          variants={itemVariants}
+          className="h-[75%]"
+        >
           <AiChatPage />
         </motion.div>
       </motion.div>
 
       {/* Right Column - Media Feed and Verification Panel */}
-      <motion.div 
-        className="w-full lg:w-1/2 flex flex-col gap-6 overflow-hidden"
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col gap-6 h-full"
       >
-        <motion.div variants={itemVariants} className="flex-grow">
+        <motion.div
+          variants={itemVariants}
+          className="h-[66%]"
+        >
           <MediaFeed />
         </motion.div>
-        <motion.div variants={itemVariants} className="flex-shrink-0">
+        <motion.div
+          variants={itemVariants}
+          className="h-[34%]"
+        >
           <VerificationPanel />
         </motion.div>
       </motion.div>
+
+      <style jsx global>{`
+        html, body {
+          height: 100vh;
+          overflow: hidden;
+        }
+        
+        /* Remove fixed heights from component cards */
+        .card {
+          height: 100% !important;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        /* Ensure content areas use remaining height */
+        .card-content {
+          flex: 1;
+          overflow: auto;
+        }
+      `}</style>
     </motion.div>
   );
 }
