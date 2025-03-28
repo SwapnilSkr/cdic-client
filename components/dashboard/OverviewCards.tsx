@@ -42,16 +42,16 @@ export default function OverviewCards() {
 
   if (loading) {
     return (
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 h-full">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="w-full">
+          <Card key={i} className="w-full h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <Skeleton className="h-5 w-[100px]" />
               <Skeleton className="h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-8 w-[60px] mb-1" />
-              <Skeleton className="h-4 w-[120px]" />
+              <Skeleton className="h-8 w-[60px] md:w-[40px] mb-1" />
+              <Skeleton className="h-4 w-[120px] md:w-[100px]" />
             </CardContent>
           </Card>
         ))}
@@ -87,9 +87,9 @@ export default function OverviewCards() {
   ];
 
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+    <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 h-full">
       {cards.map((card, i) => (
-        <Card key={i} className="w-full">
+        <Card key={i} className="w-full h-full">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {card.title}

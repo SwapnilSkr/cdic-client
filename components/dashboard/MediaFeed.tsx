@@ -59,9 +59,9 @@ export default function MediaFeed() {
         <CardHeader className="flex-shrink-0">
           <Skeleton className="h-8 w-[300px]" />
         </CardHeader>
-        <CardContent className="flex-grow">
+        <CardContent className="flex-grow overflow-hidden">
           <ul className="space-y-4">
-            {[...Array(5)].map((_, index) => (
+            {[...Array(3)].map((_, index) => (
               <li key={index} className="border-b pb-2">
                 <Skeleton className="h-4 w-full mb-2" />
                 <div className="flex justify-between">

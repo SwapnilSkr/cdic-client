@@ -55,7 +55,7 @@ export default function VerificationPanel() {
         </CardHeader>
         <CardContent className="flex-grow">
           <ul className="space-y-4">
-            {[...Array(5)].map((_, index) => (
+            {[...Array(3)].map((_, index) => (
               <li key={index} className="border-b pb-2">
                 <Skeleton className="h-4 w-full mb-2" />
                 <div className="flex justify-between">

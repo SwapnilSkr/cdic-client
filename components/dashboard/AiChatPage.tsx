@@ -274,7 +274,7 @@ export default function AiChatPage() {
     const { introText, postsData, authorsData, statsData } = parseStructuredContent();
 
     return (
-      <div className="space-y-3 w-full">
+      <div className="space-y-3 w-full h-[400px]">
         {introText && (
           <div className="text-sm">
             <ReactMarkdown>{introText}</ReactMarkdown>
@@ -378,7 +378,7 @@ export default function AiChatPage() {
   }
 
   return (
-    <Card className="h-[400px] flex flex-col">
+    <Card className="h-full flex flex-col">
       <CardHeader className="h-16 border-b p-3 bg-primary flex-shrink-0">
         <CardTitle className="text-xl font-bold text-primary-foreground">
           AI Assistant
