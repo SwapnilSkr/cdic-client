@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,16 +27,13 @@ export default function AiChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { token } = useUserStore();
+  const prevMessagesLength = useRef(messages.length);
 
-  const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -70,51 +67,65 @@ export default function AiChatPage() {
     loadChatHistory();
   }, [token]);
 
+  useEffect(() => {
+    // Scroll to bottom on any message change
+    scrollToBottom();
+    prevMessagesLength.current = messages.length;
+  }, [messages, scrollToBottom]);
+
   const handleSendMessage = async () => {
-    if (input.trim()) {
-      const userMessage: Message = { role: "user", content: input };
-      setMessages((prev) => [...prev, userMessage]);
-      setInput("");
-      setIsLoading(true);
+    if (!input.trim()) return;
 
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/ai/chat`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              messages: messages.concat(userMessage).map((msg) => ({
-                role: msg.role === "ai" ? "assistant" : msg.role,
-                content: msg.content,
-              })),
-            }),
-          }
-        );
+    const userMessage: Message = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
 
-        if (!response.ok) {
-          throw new Error("Failed to get AI response");
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/ai/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            messages: messages.concat(userMessage).map((msg) => ({
+              role: msg.role === "ai" ? "assistant" : msg.role,
+              content: msg.content,
+            })),
+          }),
         }
+      );
 
-        const data = await response.json();
-        const aiMessage: Message = {
-          role: "ai",
-          content: data.message.content,
-        };
-        setMessages((prev) => [...prev, aiMessage]);
-      } catch (error) {
-        console.error("Error:", error);
-        const errorMessage: Message = {
-          role: "ai",
-          content: "Sorry, I encountered an error. Please try again.",
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      } finally {
-        setIsLoading(false);
-      }
+      if (!response.ok) throw new Error("Failed to get AI response");
+
+      const data = await response.json();
+      const aiMessage: Message = {
+        role: "ai",
+        content: data.message.content,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMessage: Message = {
+        role: "ai",
+        content: "Sorry, I encountered an error. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !isLoading) {
+      handleSendMessage();
     }
   };
 
@@ -144,30 +155,39 @@ export default function AiChatPage() {
                 <ExternalLink className="ml-1 h-3 w-3" />
               </a>
             ),
-            p: ({ node, ...props }) => <p {...props} className="mb-3 last:mb-0" />,
-            ul: ({ node, ...props }) => <ul {...props} className="list-disc pl-4 mb-3" />,
-            ol: ({ node, ...props }) => <ol {...props} className="list-decimal pl-4 mb-3" />,
+            p: ({ node, ...props }) => (
+              <p {...props} className="mb-2 last:mb-0" />
+            ),
+            ul: ({ node, ...props }) => (
+              <ul {...props} className="list-disc pl-5 mb-2" />
+            ),
+            ol: ({ node, ...props }) => (
+              <ol {...props} className="list-decimal pl-5 mb-2" />
+            ),
             li: ({ node, ...props }) => <li {...props} className="mb-1" />,
             h3: ({ node, ...props }) => (
-              <h3 {...props} className="text-base font-semibold mb-2 mt-4" />
+              <h3 {...props} className="text-lg font-semibold mb-2 mt-3" />
             ),
             h4: ({ node, ...props }) => (
-              <h4 {...props} className="text-sm font-semibold mb-1 mt-3" />
+              <h4 {...props} className="text-base font-semibold mb-1 mt-2" />
             ),
-            code: ({ node, ...props }) => {
-              const isInline =
-                props.className &&
-                typeof props.className === "string" &&
-                props.className.includes("inline");
-              return isInline ? (
-                <code {...props} className="bg-muted px-1 py-0.5 rounded text-xs" />
-              ) : (
-                <code
-                  {...props}
-                  className="block bg-muted p-2 rounded-md text-xs my-2 overflow-x-auto"
-                />
-              );
-            },
+            code: ({
+              node,
+              inline,
+              ...props
+            }: {
+              node?: any;
+              inline?: boolean;
+            } & React.HTMLAttributes<HTMLElement>) => (
+              <code
+                {...props}
+                className={
+                  inline
+                    ? "bg-muted px-1 py-0.5 rounded text-xs"
+                    : "block bg-muted p-2 rounded-md text-xs my-2 overflow-x-auto"
+                }
+              />
+            ),
           }}
         >
           {content}
@@ -179,51 +199,37 @@ export default function AiChatPage() {
 
   const FormattedAiResponse = ({ content }: { content: string }) => {
     const parseStructuredContent = () => {
-      const hasPosts =
-        content.includes("Sample Posts:") ||
-        content.includes("Platform:") ||
-        content.includes("Content:");
-      const hasAuthors =
-        content.includes("Creator Information:") || content.includes("followers");
-      const hasStats =
-        content.includes("Statistics:") || content.includes("Distribution:");
+      const hasPosts = content.includes("Sample Posts:");
+      const hasAuthors = content.includes("Creator Information:");
+      const hasStats = content.includes("Platform Statistics Overview:");
 
       let introText = "";
-      const postsData = [];
-      const authorsData = [];
+      const postsData: any[] = [];
+      const authorsData: any[] = [];
       let statsData = "";
 
       const introMatch = content.match(
-        /^(.*?)(?:Sample Posts:|Creator Information:|Statistics:)/s
+        /^(.*?)(?:Sample Posts:|Creator Information:|Platform Statistics Overview:|$)/s
       );
-      if (introMatch) {
-        introText = introMatch[1].trim();
-      } else {
-        introText = content;
-      }
+      if (introMatch) introText = introMatch[1].trim();
 
       if (hasPosts) {
         const postsSection = content.match(
-          /Sample Posts:(.*?)(?:Creator Information:|Statistics:|$)/s
+          /Sample Posts:(.*?)(?:Creator Information:|Platform Statistics Overview:|$)/s
         );
         if (postsSection) {
           const postsText = postsSection[1];
-          const postMatches = Array.from(
-            postsText.match(/(\d+)\.(.*?)(?=\d+\.|$)/gs) || []
-          )
-            .map((match) => {
-              const regex = /(\d+)\.(.*?)(?=\d+\.|$)/;
-              return regex.exec(match);
-            })
-            .filter(Boolean);
-
+          const postMatches = postsText.matchAll(
+            /(\d+)\.\s*(.*?)(?=\d+\.|$)/gs
+          );
           for (const match of postMatches) {
-            if (!match) continue;
             const postText = match[2].trim();
-            const platformMatch = postText.match(/Platform: (.*?)(?:,|$)/);
-            const dateMatch = postText.match(/from (.*?)$/m);
-            const contentMatch = postText.match(/Content: "(.*?)"/);
-            const engagementMatch = postText.match(/Engagement: (.*?) interactions/);
+            const platformMatch = postText.match(/^(.*?)\s+post\s+from/);
+            const dateMatch = postText.match(/from\s+(.+)$/m);
+            const contentMatch = postText.match(/Content:\s+"(.*?)"/);
+            const engagementMatch = postText.match(
+              /Engagement:\s+(\d+)\s+interactions/
+            );
 
             postsData.push({
               platform: platformMatch ? platformMatch[1].trim() : "Unknown",
@@ -237,23 +243,29 @@ export default function AiChatPage() {
 
       if (hasAuthors) {
         const authorsSection = content.match(
-          /Creator Information:(.*?)(?:Sample Posts:|Statistics:|$)/s
+          /Creator Information:(.*?)(?:Sample Posts:|Platform Statistics Overview:|$)/s
         );
         if (authorsSection) {
           const authorsText = authorsSection[1];
-          const authorMatches = authorsText.matchAll(/(\d+)\.(.*?)(?=\d+\.|$)/gs);
+          const authorMatches = authorsText.matchAll(
+            /(\d+)\.\s*(.*?)(?=\d+\.|$)/gs
+          );
           for (const match of authorMatches) {
             const authorText = match[2].trim();
             const usernameMatch = authorText.match(/(.*?)\s*\(/);
             const platformMatch = authorText.match(/\((.*?)\)/);
-            const followersMatch = authorText.match(/Followers: (.*?)$/m);
-            const recentPostMatch = authorText.match(/Recent post: "(.*?)"/);
+            const followersMatch = authorText.match(/Followers:\s+(.*?)$/m);
+            const postsMatch = authorText.match(/Total Posts:\s+(\d+)/);
+            const avgEngagementMatch = authorText.match(
+              /Avg Engagement:\s+([\d.]+)/
+            );
 
             authorsData.push({
-              username: usernameMatch ? usernameMatch[1].trim() : "Unknown user",
-              platform: platformMatch ? platformMatch[1].trim() : "Unknown platform",
+              username: usernameMatch ? usernameMatch[1].trim() : "Unknown",
+              platform: platformMatch ? platformMatch[1].trim() : "Unknown",
               followers: followersMatch ? followersMatch[1].trim() : "Unknown",
-              recentPost: recentPostMatch ? recentPostMatch[1].trim() : null,
+              totalPosts: postsMatch ? postsMatch[1] : "0",
+              avgEngagement: avgEngagementMatch ? avgEngagementMatch[1] : "N/A",
             });
           }
         }
@@ -261,41 +273,41 @@ export default function AiChatPage() {
 
       if (hasStats) {
         const statsSection = content.match(
-          /Statistics:(.*?)(?:Sample Posts:|Creator Information:|$)/s
+          /Platform Statistics Overview:(.*)$/s
         );
-        if (statsSection) {
-          statsData = statsSection[1].trim();
-        }
+        if (statsSection) statsData = statsSection[1].trim();
       }
 
       return { introText, postsData, authorsData, statsData };
     };
 
-    const { introText, postsData, authorsData, statsData } = parseStructuredContent();
+    const { introText, postsData, authorsData, statsData } =
+      parseStructuredContent();
 
     return (
-      <div className="space-y-3 w-full h-[400px]">
-        {introText && (
-          <div className="text-sm">
-            <ReactMarkdown>{introText}</ReactMarkdown>
-          </div>
-        )}
+      <div className="space-y-4">
+        {introText && <ReactMarkdown>{introText}</ReactMarkdown>}
         {postsData.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Related Posts
             </h4>
             {postsData.map((post, index) => (
-              <div key={index} className="bg-background rounded-lg p-3 border shadow-sm">
+              <div
+                key={index}
+                className="bg-card rounded-lg p-3 border shadow-sm"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <Badge variant="outline" className="capitalize">
                     {post.platform}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">{post.date}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {post.date}
+                  </span>
                 </div>
-                <p className="text-sm mb-2">{post.content}</p>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <span>Engagement: {post.engagement}</span>
+                <p className="text-sm mb-2 line-clamp-2">{post.content}</p>
+                <div className="text-xs text-muted-foreground">
+                  Engagement: {post.engagement}
                 </div>
               </div>
             ))}
@@ -307,7 +319,10 @@ export default function AiChatPage() {
               Content Creators
             </h4>
             {authorsData.map((author, index) => (
-              <div key={index} className="bg-background rounded-lg p-3 border shadow-sm">
+              <div
+                key={index}
+                className="bg-card rounded-lg p-3 border shadow-sm"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Avatar className="w-6 h-6">
@@ -315,37 +330,28 @@ export default function AiChatPage() {
                         {author.username.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="font-medium">{author.username}</span>
+                    <span className="font-medium text-sm">
+                      {author.username}
+                    </span>
                   </div>
                   <Badge variant="outline">{author.platform}</Badge>
                 </div>
-                <div className="text-xs flex justify-between">
-                  <span className="text-muted-foreground">Followers: {author.followers}</span>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>Followers: {author.followers}</p>
+                  <p>Total Posts: {author.totalPosts}</p>
+                  <p>Avg Engagement: {author.avgEngagement}</p>
                 </div>
-                {author.recentPost && (
-                  <div className="mt-2 text-sm border-t pt-2">
-                    <span className="block text-xs text-muted-foreground mb-1">
-                      Recent post:
-                    </span>
-                    <p className="text-xs">{author.recentPost}</p>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         )}
         {statsData && (
-          <div className="bg-background rounded-lg p-3 border shadow-sm">
+          <div className="bg-card rounded-lg p-3 border shadow-sm">
             <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
               Statistics
             </h4>
-            <div className="text-sm">
-              <ReactMarkdown>{statsData}</ReactMarkdown>
-            </div>
+            <ReactMarkdown>{statsData}</ReactMarkdown>
           </div>
-        )}
-        {!introText && postsData.length === 0 && authorsData.length === 0 && !statsData && (
-          <ReactMarkdown>{content}</ReactMarkdown>
         )}
       </div>
     );
@@ -354,40 +360,38 @@ export default function AiChatPage() {
   if (isInitialLoading) {
     return (
       <Card className="h-full flex flex-col">
-        <CardHeader className="h-16 border-b p-3 bg-primary flex-shrink-0">
+        <CardHeader className="border-b p-3 bg-primary flex-shrink-0">
           <Skeleton className="h-6 w-32" />
         </CardHeader>
         <CardContent className="flex-grow p-4 overflow-hidden">
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="flex items-start space-x-2">
-                <Skeleton className="h-6 w-6 rounded-full" />
-                <Skeleton className="h-16 w-[70%] rounded-lg" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-20 w-3/4 rounded-lg" />
               </div>
             ))}
           </div>
         </CardContent>
-        <div className="h-20 p-3 bg-muted border-t flex-shrink-0">
-          <div className="flex items-center space-x-2">
-            <Skeleton className="h-9 flex-grow" />
-            <Skeleton className="h-9 w-9" />
-          </div>
+        <div className="p-3 bg-muted border-t flex-shrink-0">
+          <Skeleton className="h-10 w-full" />
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="h-16 border-b p-3 bg-primary flex-shrink-0">
-        <CardTitle className="text-xl font-bold text-primary-foreground">
+    <Card className="h-full flex flex-col overflow-hidden">
+      <CardHeader className="border-b p-3 bg-primary flex-shrink-0">
+        <CardTitle className="text-lg font-bold text-primary-foreground">
           AI Assistant
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow p-0 flex flex-col overflow-hidden">
         <div
           ref={chatContainerRef}
-          className="flex-grow overflow-y-auto p-4 messages-container min-h-0"
+          className="flex-grow overflow-y-auto p-4 space-y-4 messages-container"
+          style={{ maxHeight: "calc(100vh - 160px)" }}
         >
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
@@ -395,19 +399,22 @@ export default function AiChatPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="flex flex-col items-center text-center px-4"
+                className="text-center px-4"
               >
-                <div className="bg-primary/10 rounded-full p-4 mb-3">
-                  <MessageSquare className="w-8 h-8 text-primary" />
+                <div className="bg-primary/10 rounded-full p-3 mb-3 inline-block">
+                  <MessageSquare className="w-6 h-6 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Welcome to Verideck AI Chat</h2>
-                <p className="text-sm text-muted-foreground">
-                  Get instant insights and assistance for your media monitoring tasks.
+                <h2 className="text-lg font-semibold mb-2">
+                  Welcome to Verideck AI Chat
+                </h2>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  Get instant insights and assistance for your media monitoring
+                  tasks.
                 </p>
               </motion.div>
             </div>
           ) : (
-            <AnimatePresence>
+            <AnimatePresence initial={false}>
               {messages.map((message, index) => (
                 <motion.div
                   key={index}
@@ -417,27 +424,29 @@ export default function AiChatPage() {
                   transition={{ duration: 0.3 }}
                   className={`flex ${
                     message.role === "user" ? "justify-end" : "justify-start"
-                  } mb-4`}
+                  }`}
                 >
                   <div
-                    className={`flex items-start ${
+                    className={`flex items-start gap-2 ${
                       message.role === "user" ? "flex-row-reverse" : "flex-row"
-                    } ${message.role === "user" ? "max-w-[75%]" : "max-w-[85%]"}`}
+                    } max-w-[80%]`}
                   >
-                    <Avatar
-                      className={`w-8 h-8 mt-1 ${
-                        message.role === "user" ? "ml-2" : "mr-2"
-                      }`}
-                    >
+                    <Avatar className="w-8 h-8 mt-1 flex-shrink-0">
                       <AvatarFallback
                         className={
-                          message.role === "ai" ? "bg-primary text-primary-foreground" : ""
+                          message.role === "ai"
+                            ? "bg-primary text-primary-foreground"
+                            : ""
                         }
                       >
                         {message.role === "user" ? "U" : "AI"}
                       </AvatarFallback>
                       <AvatarImage
-                        src={message.role === "user" ? "/user-avatar.png" : "/ai-avatar.png"}
+                        src={
+                          message.role === "user"
+                            ? "/user-avatar.png"
+                            : "/ai-avatar.png"
+                        }
                       />
                     </Avatar>
                     <div
@@ -445,7 +454,7 @@ export default function AiChatPage() {
                         message.role === "user"
                           ? "bg-primary text-primary-foreground"
                           : "bg-card border shadow-sm"
-                      } ${message.role === "ai" ? "w-full" : ""}`}
+                      }`}
                     >
                       {message.role === "user" ? (
                         message.content
@@ -460,18 +469,19 @@ export default function AiChatPage() {
           )}
           <div ref={messagesEndRef} />
         </div>
-        <div className="h-20 p-3 bg-muted border-t flex-shrink-0">
-          <div className="flex items-center space-x-2 h-full">
+        <div className="p-3 bg-muted border-t flex-shrink-0 mt-auto">
+          <div className="flex items-center space-x-2">
             <Input
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
               className="flex-grow text-sm"
+              disabled={isLoading}
             />
             <Button
               onClick={handleSendMessage}
-              disabled={isLoading}
+              disabled={isLoading || !input.trim()}
               size="sm"
               className="px-3"
             >
@@ -490,15 +500,14 @@ export default function AiChatPage() {
           scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
         }
         .messages-container::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         .messages-container::-webkit-scrollbar-track {
           background: transparent;
         }
         .messages-container::-webkit-scrollbar-thumb {
           background-color: rgba(155, 155, 155, 0.5);
-          border-radius: 20px;
-          border: transparent;
+          border-radius: 4px;
         }
       `}</style>
     </Card>
