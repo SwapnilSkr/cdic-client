@@ -12,7 +12,7 @@ import { Twitter, Instagram, Youtube } from "lucide-react";
 import { type FeedItem } from "@/utils/mockFeedItems";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUserStore } from "@/state/user.store";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaReddit } from "react-icons/fa";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -81,6 +81,7 @@ function MediaFeedContent() {
       { name: "Instagram", icon: Instagram },
       { name: "Youtube", icon: Youtube },
       { name: "News", icon: FaGoogle },
+      { name: "Reddit", icon: FaReddit },
     ],
     languages: [
       { value: "en", label: "English" },

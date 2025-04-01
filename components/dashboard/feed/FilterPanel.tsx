@@ -90,11 +90,6 @@ export default function FilterPanel({ filters, setFilters, apiData }: FilterPane
       enabled: true
     })),
     { 
-      name: "Reddit", 
-      icon: FaReddit, 
-      enabled: false
-    },
-    { 
       name: "Facebook", 
       icon: Facebook, 
       enabled: false
