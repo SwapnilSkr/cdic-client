@@ -58,7 +58,7 @@ interface ApiData {
 function MediaFeedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { token } = useUserStore();
+  const { token, user } = useUserStore();
   
   // Initialize with URL params
   const currentPage = parseInt(searchParams.get('page') || '1');
@@ -258,26 +258,30 @@ function MediaFeedContent() {
 
   const toggleFlag = async (id: string) => {
     try {
-      // Let the FeedList component handle the API call
-      // This function will only update the UI after successful toggle
+      // Update the UI state without refetching
       setApiData(prev => ({
         ...prev,
         feedItems: prev.feedItems.map((item) =>
-          item.id.toString() === id ? { ...item, flagged: !item.flagged } : item
+          item.id.toString() === id 
+            ? { 
+                ...item, 
+                flagged: !item.flagged,
+                flaggedBy: !item.flagged 
+                  ? [...(item.flaggedBy || []), user?._id || ""]
+                  : (item.flaggedBy || []).filter(id => id !== user?._id)
+              } 
+            : item
         )
       }));
 
-      // Refetch to update summary counts
-      await fetchPosts(pagination.currentPage);
+      // Update summary stats without refetching
+      setSummaryStats(prev => ({
+        ...prev,
+        totalFlagged: prev.totalFlagged + (apiData.feedItems.find(item => item.id.toString() === id)?.flagged ? -1 : 1),
+        filteredFlagged: prev.filteredFlagged + (apiData.feedItems.find(item => item.id.toString() === id)?.flagged ? -1 : 1)
+      }));
     } catch (error) {
       console.error('Error updating flag state:', error);
-      // Revert the optimistic update if there's an error
-      setApiData(prev => ({
-        ...prev,
-        feedItems: prev.feedItems.map((item) =>
-          item.id.toString() === id ? { ...item, flagged: !item.flagged } : item
-        )
-      }));
     }
   };
 

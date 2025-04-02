@@ -333,25 +333,50 @@ export default function HandlesPage() {
           <CardTitle>Platform Statistics</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="platform" />
-              <YAxis tickFormatter={formatNumber} className="text-[13px]" />
-              <Tooltip
-                formatter={(value: number, name: string) => [formatNumber(value), name]}
-                labelFormatter={(label) => `Platform: ${label}`}
-              />
-              <Legend />
-              <Bar dataKey="followers" name="Followers" fill="#8884d8" />
-              <Bar dataKey="views" name="Engagements" fill="#82ca9d" />
-            </BarChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <div className="space-y-4">
+              <div className="h-[300px] w-full bg-muted animate-pulse rounded-lg" />
+              <div className="flex justify-center space-x-4">
+                <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+              </div>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="platform" />
+                <YAxis tickFormatter={formatNumber} className="text-[13px]" />
+                <Tooltip
+                  formatter={(value: number, name: string) => [formatNumber(value), name]}
+                  labelFormatter={(label) => `Platform: ${label}`}
+                />
+                <Legend />
+                <Bar dataKey="followers" name="Followers" fill="#8884d8" />
+                <Bar dataKey="views" name="Engagements" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
 
       {loading ? (
-        <p>Loading authors...</p>
+        <div className="bg-background rounded-lg shadow overflow-x-auto">
+          <div className="p-4 space-y-4">
+            <div className="h-8 bg-muted animate-pulse rounded w-1/4" />
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex space-x-4">
+                  <div className="h-4 bg-muted animate-pulse rounded w-1/4" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-1/6" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-1/6" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-1/6" />
+                  <div className="h-4 bg-muted animate-pulse rounded w-1/6" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="bg-background rounded-lg shadow overflow-x-auto">
           <Table>

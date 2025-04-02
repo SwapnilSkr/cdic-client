@@ -13,6 +13,7 @@ import {
   Youtube,
   MessageCircle,
   Twitter,
+  Loader2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,7 @@ export default function FeedList({
   const [imagePreviewItem, setImagePreviewItem] = useState<FeedItem | null>(null);
   const {token, user} = useUserStore();
   const [localItems, setLocalItems] = useState<FeedItem[]>(items);
+  const [flagLoadingStates, setFlagLoadingStates] = useState<{ [key: number]: boolean }>({});
   const feedContainerRef = useRef<HTMLDivElement>(null);
 
   // Update local items when items prop changes
@@ -198,6 +200,9 @@ export default function FeedList({
 
   const togglePostFlag = async (id: number) => {
     try {
+      // Set loading state for this specific button
+      setFlagLoadingStates(prev => ({ ...prev, [id]: true }));
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/posts/toggle-flag/${id}`,
         {
@@ -209,7 +214,29 @@ export default function FeedList({
         }
       );
     
-      // This will trigger the optimistic update and refetch
+      if (!response.ok) {
+        throw new Error('Failed to toggle flag');
+      }
+
+      const data = await response.json();
+      
+      // Update local state only after successful API response
+      setLocalItems(prevItems => 
+        prevItems.map(item => 
+          item.id === id 
+            ? { ...item, flagged: data.flagged, flaggedBy: data.flaggedBy } 
+            : item
+        )
+      );
+
+      // Show success toast
+      toast({
+        title: "Success",
+        description: data.flagged ? "Post flagged successfully" : "Post unflagged successfully",
+        variant: "default",
+      });
+
+      // Call the parent's toggleFlag function to update the parent state
       toggleFlag(id.toString());
 
     } catch (error) {
@@ -219,6 +246,9 @@ export default function FeedList({
         description: "Failed to toggle flag. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      // Clear loading state for this specific button
+      setFlagLoadingStates(prev => ({ ...prev, [id]: false }));
     }
   };
 
@@ -522,8 +552,13 @@ export default function FeedList({
                           e.stopPropagation(); // Prevent card click event
                           togglePostFlag(item.id);
                         }}
+                        disabled={flagLoadingStates[item.id]}
                       >
-                        <Flag className="mr-1 h-4 w-4" />
+                        {flagLoadingStates[item.id] ? (
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Flag className="mr-1 h-4 w-4" />
+                        )}
                         {item.flagged && item.flaggedBy?.includes(user?._id || "") ? "Flagged" : "Flag"}
                       </Button>
                       <Button
