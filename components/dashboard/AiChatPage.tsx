@@ -384,7 +384,7 @@ export default function AiChatPage() {
     <Card className="h-full flex flex-col overflow-hidden">
       <CardHeader className="border-b p-3 bg-primary flex-shrink-0">
         <CardTitle className="text-lg font-bold text-primary-foreground">
-          AI Assistant
+          AI Fact-Check Assistant
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow p-0 flex flex-col overflow-hidden">
@@ -405,7 +405,7 @@ export default function AiChatPage() {
                   <MessageSquare className="w-6 h-6 text-primary" />
                 </div>
                 <h2 className="text-lg font-semibold mb-2">
-                  Welcome to Verideck AI Chat
+                  Welcome to Verideck AI Fact Checking Assistant
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md">
                   Get instant insights and assistance for your media monitoring

@@ -27,7 +27,7 @@ export default function Header({ children }: { children?: React.ReactNode }) {
   };
 
   return (
-    <header className="bg-background border-b py-4 px-6">
+    <header className="bg-background border-b px-6">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Left Section - Search */}
         <div className="w-full md:w-1/3">
@@ -54,11 +54,13 @@ export default function Header({ children }: { children?: React.ReactNode }) {
         </div>
 
         {/* Center Section - Logo */}
-        <div className="flex-shrink-0 h-[80px] w-auto order-first md:order-none">
+        <div className="flex-shrink-0 w-[200px] h-[100px] order-first md:order-none">
           <Image
             src={Logo}
             alt="Verideck Logo"
-            className="h-full w-auto"
+            width={0}
+            height={0}
+            className="h-full w-full object-cover"
             priority
           />
         </div>

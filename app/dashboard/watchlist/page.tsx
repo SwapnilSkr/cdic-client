@@ -43,7 +43,7 @@ export default function HandlesPage() {
   //const [frequencyFilter, setFrequencyFilter] = useState<string | null>(null)
   const [platformStatistics, setPlatformStatistics] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [flaggedFilter, setFlaggedFilter] = useState<string>("all")
+  const [flaggedFilter, setFlaggedFilter] = useState<string>("true")
   const {token} = useUserStore()
 
   const fetchAuthors = async (page: number, searchTerm: string, platformFilter: string | null, flaggedFilter: string) => {

@@ -97,7 +97,7 @@ function MediaFeedContent() {
     currentPage: parseInt(searchParams.get('page') || '1'),
     totalPages: 1,
     totalPosts: 0,
-    limit: 5,
+    limit: 30,
     hasNextPage: false,
     hasPrevPage: false,
   });

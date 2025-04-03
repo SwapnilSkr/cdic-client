@@ -34,11 +34,11 @@ export default function Dashboard() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:space-y-8 xl:space-y-6">
           {/* Overview Cards */}
           <motion.section 
             variants={itemVariants}
-            className="h-[400px] md:h-[200px]"
+            className="h-[400px] md:h-[200px] lg:h-[300px] xl:h-[200px]"
           >
             <OverviewCards />
           </motion.section>
@@ -46,7 +46,7 @@ export default function Dashboard() {
           {/* AI Chat */}
           <motion.section 
             variants={itemVariants}
-            className="h-[400px]"
+            className="h-[340px] xl:h-[420px]"
           >
             <AiChatPage />
           </motion.section>
@@ -57,7 +57,7 @@ export default function Dashboard() {
           {/* Media Feed */}
           <motion.section 
             variants={itemVariants}
-            className="h-[400px] md:h-[300px]"
+            className="h-[400px] md:h-[300px] lg:h-[400px]"
           >
             <MediaFeed />
           </motion.section>
@@ -65,7 +65,7 @@ export default function Dashboard() {
           {/* Verification Panel */}
           <motion.section 
             variants={itemVariants}
-            className="h-[400px] md:h-[300px]"
+            className="h-[400px] md:h-[245px] xl:h-[220px]"
           >
             <VerificationPanel />
           </motion.section>

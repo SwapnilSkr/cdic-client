@@ -46,12 +46,12 @@ export default function OverviewCards() {
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="w-full h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <Skeleton className="h-5 w-[100px]" />
+              <Skeleton className="h-5 w-full" />
               <Skeleton className="h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-8 w-[60px] md:w-[40px] mb-1" />
-              <Skeleton className="h-4 w-[120px] md:w-[100px]" />
+              <Skeleton className="h-8 w-full mb-2" />
+              <Skeleton className="h-4 w-full" />
             </CardContent>
           </Card>
         ))}
@@ -97,7 +97,7 @@ export default function OverviewCards() {
             <card.icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{card.value}</div>
+            <div className="text-2xl font-bold break-all">{card.value}</div>
             <p className="text-xs text-muted-foreground">
               {card.description}
             </p>
