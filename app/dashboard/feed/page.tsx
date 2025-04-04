@@ -8,11 +8,29 @@ import { motion } from "framer-motion";
 import FilterPanel from "@/components/dashboard/feed/FilterPanel";
 import FeedList from "@/components/dashboard/feed/FeedList";
 import SummaryWidget from "@/components/dashboard/feed/SummaryWidget";
-import { Twitter, Instagram, Youtube } from "lucide-react";
+import { Twitter, Instagram, Youtube, Plus } from "lucide-react";
 import { type FeedItem } from "@/utils/mockFeedItems";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useUserStore } from "@/state/user.store";
 import { FaGoogle, FaReddit } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -54,14 +72,31 @@ interface ApiData {
   feedItems: FeedItem[];
 }
 
+interface Topic {
+  _id: string;
+  name: string;
+  description?: string;
+  active: boolean;
+  createdAt: string;
+}
+
 // Separate the main content into a new component
 function MediaFeedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, user } = useUserStore();
+  const { toast } = useToast();
   
   // Initialize with URL params
   const currentPage = parseInt(searchParams.get('page') || '1');
+  
+  // Modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [postUrl, setPostUrl] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [filters, setFilters] = useState<Filters>({
     platforms: searchParams.get('platforms')?.split(',') || [],
@@ -108,6 +143,102 @@ function MediaFeedContent() {
     filteredTotal: 0,
     filteredFlagged: 0,
   });
+
+  // Fetch topics when modal opens
+  useEffect(() => {
+    if (showAddModal && token) {
+      fetchTopics();
+    }
+  }, [showAddModal, token]);
+
+  // Fetch topics function
+  const fetchTopics = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/topics?limit=100`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+        }
+      );
+      
+      if (!response.ok) throw new Error("Failed to fetch topics");
+      
+      const data = await response.json();
+      setTopics(data.topics);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to load topics. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle form submission
+  const handleSubmitPost = async () => {
+    if (!postUrl || !selectedPlatform || !selectedTopic) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/fetch-by-url`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            url: postUrl,
+            platform: selectedPlatform,
+            topicId: selectedTopic
+          })
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add post");
+      }
+      
+      const result = await response.json();
+      
+      // Add the new post to state if applicable
+      if (result.data) {
+        // Refresh current page to show the new post
+        fetchPosts(pagination.currentPage);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Post added successfully",
+      });
+      
+      // Reset form and close modal
+      setPostUrl("");
+      setSelectedPlatform("");
+      setSelectedTopic("");
+      setShowAddModal(false);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to add post",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Add a separate effect to handle search parameter changes
   useEffect(() => {
@@ -293,17 +424,26 @@ function MediaFeedContent() {
       animate="visible"
     >
       <motion.div className="w-full md:w-3/4" variants={itemVariants}>
-        <FilterPanel 
-          filters={filters} 
-          setFilters={setFilters} 
-          apiData={{
-            ...apiData,
-            platforms: apiData.platforms.map(platform => ({
-              ...platform,
-              enabled: platform.enabled ?? false
-            }))
-          }}
-        />
+        <div className="flex justify-between items-center mb-4">
+          <FilterPanel 
+            filters={filters} 
+            setFilters={setFilters} 
+            apiData={{
+              ...apiData,
+              platforms: apiData.platforms.map(platform => ({
+                ...platform,
+                enabled: platform.enabled ?? false
+              }))
+            }}
+          />
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="ml-2"
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add Post
+          </Button>
+        </div>
         <FeedList 
           filters={filters} 
           items={apiData.feedItems}
@@ -323,6 +463,71 @@ function MediaFeedContent() {
           filteredFlagged={summaryStats.filteredFlagged}
         />
       </motion.div>
+
+      {/* Add Post Modal */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Post by URL</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="post-url">Post URL</Label>
+              <Input
+                id="post-url"
+                placeholder="https://..."
+                value={postUrl}
+                onChange={(e) => setPostUrl(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="platform">Platform</Label>
+              <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                <SelectTrigger id="platform">
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Twitter">Twitter</SelectItem>
+                  <SelectItem value="Instagram">Instagram</SelectItem>
+                  <SelectItem value="Youtube">Youtube</SelectItem>
+                  <SelectItem value="Reddit">Reddit</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="topic">Topic</Label>
+              <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+                <SelectTrigger id="topic">
+                  <SelectValue placeholder="Select topic" />
+                </SelectTrigger>
+                <SelectContent>
+                  {topics.map((topic) => (
+                    <SelectItem key={topic._id} value={topic._id}>
+                      {topic.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowAddModal(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmitPost}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Adding..." : "Add Post"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
